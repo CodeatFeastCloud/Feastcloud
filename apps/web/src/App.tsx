@@ -31,6 +31,7 @@ export default function App() {
   const [pairing, setPairing] = useState(false);
   const t = useMemo(() => createTranslator(kitchen.preferences.locale), [kitchen.preferences.locale]);
   const publicSlug = window.location.pathname.match(/^\/order\/([A-Za-z0-9_-]{16,96})$/)?.[1];
+  const incomingFlow = new URLSearchParams(window.location.search).get('flow') === 'incoming';
   const organizationApi = useMemo(() => organizationApiBase((import.meta.env.VITE_CORE_URL as string | undefined)?.trim()), []);
 
   useEffect(() => {
@@ -120,6 +121,14 @@ export default function App() {
           <OperationsControl snapshot={kitchen.snapshot} t={t} />
         ) : kitchen.preferences.view === 'daily' ? (
           <DailyOperations snapshot={kitchen.snapshot} t={t} />
+        ) : incomingFlow ? (
+          <OrderEntry
+            locale={kitchen.preferences.locale}
+            tenantId={kitchen.snapshot.organizationId}
+            outletId={kitchen.snapshot.outletId}
+            t={t}
+            onSubmit={kitchen.submitOrder}
+          />
         ) : kitchen.preferences.view === 'commerce' ? (
           <CommerceHub snapshot={kitchen.snapshot} t={t} />
         ) : kitchen.preferences.view === 'growth' ? (
