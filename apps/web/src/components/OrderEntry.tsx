@@ -32,6 +32,11 @@ type SubmittedOrderLine = Pick<OrderLine, 'menuItemId' | 'quantity' | 'name' | '
 type CategoryFilter = string;
 type OrderCatalogItem = { id: string; name: string; description: string; category: string; priceMinor: number; vegetarian: boolean; station: string; prepMinutes: number; accent: string; glyph: string; addonGroups: CatalogAddonGroup[] };
 
+function ProviderLogo({ provider }: { provider: string }) {
+  const key = provider.toLocaleLowerCase().replace(/[^a-z0-9]+/g, '-');
+  return <span className={`provider-logo provider-logo-${key}`} aria-label={provider}>{provider}</span>;
+}
+
 const api = commerceApiBase((import.meta.env.VITE_CORE_URL as string | undefined)?.trim());
 const accents = ['#bf573e', '#527b5d', '#a77633', '#657ca6', '#805c91', '#cf7963'];
 const coreUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -775,7 +780,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
             const hasTraffic = incomingOrders.some((order) => summarizeIncoming(order, connectorById.get(order.connectorId)).provider.toLocaleLowerCase().includes(provider.key));
             const state = installed?.status === 'healthy' ? 'Live' : installed?.status === 'degraded' ? 'Needs attention' : hasTraffic ? 'Receiving' : 'Ready to connect';
             const mappedBrands = installed?.configuration?.externalOutlets?.filter((mapping) => mapping.active) ?? [];
-            return <article key={provider.key} style={{ '--connector-color': provider.color } as CSSProperties} className={installed?.status === 'healthy' || hasTraffic ? 'is-connected' : ''}><i>{provider.name.slice(0, 1)}</i><span><b>{provider.name}</b><small>{mappedBrands.length ? `${mappedBrands.length} brands mapped · ${state}` : state}</small></span></article>;
+            return <article key={provider.key} style={{ '--connector-color': provider.color } as CSSProperties} className={installed?.status === 'healthy' || hasTraffic ? 'is-connected' : ''}><ProviderLogo provider={provider.name} /><span><b>{provider.name}</b><small>{mappedBrands.length ? `${mappedBrands.length} brands mapped · ${state}` : state}</small></span></article>;
           })}</div>
         </div>
 
@@ -796,7 +801,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
           const provider = connectorCatalog.find((value) => summary.provider.toLocaleLowerCase().includes(value.key));
           const ageMinutes = Math.max(0, Math.floor((Date.now() - Date.parse(order.receivedAt)) / 60_000));
           return <article className="incoming-order-card" key={order.id} style={{ '--connector-color': provider?.color ?? '#294146' } as CSSProperties}>
-            <header><span className="incoming-provider"><i>{summary.provider.slice(0, 1).toUpperCase()}</i><span><b>{summary.brand || summary.provider}{summary.simulated && <em className="simulation-badge">Test</em>}</b><small>{summary.brand ? `${summary.provider} · ` : ''}#{order.externalOrderId}{summary.externalOutletId ? ` · Store ${summary.externalOutletId}` : ''}</small></span></span><span className="incoming-card-state"><em className={`status-${order.status}`}>{order.status === 'received' ? 'Awaiting' : order.status === 'needs_review' ? 'Review' : order.status}</em><strong className={ageMinutes >= 5 && order.status === 'received' ? 'is-late' : ''}>{ageMinutes < 1 ? 'Just now' : `${ageMinutes} min`}</strong></span></header>
+            <header><span className="incoming-provider"><ProviderLogo provider={summary.provider} /><span><b>{summary.brand || summary.provider}{summary.simulated && <em className="simulation-badge">Test</em>}</b><small>{summary.brand ? `${summary.provider} · ` : ''}#{order.externalOrderId}{summary.externalOutletId ? ` · Store ${summary.externalOutletId}` : ''}</small></span></span><span className="incoming-card-state"><em className={`status-${order.status}`}>{order.status === 'received' ? 'Awaiting' : order.status === 'needs_review' ? 'Review' : order.status}</em><strong className={ageMinutes >= 5 && order.status === 'received' ? 'is-late' : ''}>{ageMinutes < 1 ? 'Just now' : `${ageMinutes} min`}</strong></span></header>
             <div className="incoming-customer"><span><small>Customer</small><b>{summary.customer}</b></span>{summary.totalMinor !== undefined && <strong>{formatMoney(locale, summary.totalMinor)}</strong>}</div>
             {(summary.phone || summary.address || summary.payment || summary.deliveryEta || summary.deliveryPartner) && <dl className="incoming-delivery-meta">
               {summary.phone && <div><dt>Phone</dt><dd>{summary.phone}</dd></div>}
