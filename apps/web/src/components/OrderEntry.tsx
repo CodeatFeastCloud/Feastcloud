@@ -4,6 +4,7 @@ import type { KitchenOrder, Locale, OrderLine, OrderType } from '../domain/types
 import {
   commerceApiBase,
   createConnectorCanonicalOrder,
+  createConnectorInstallation,
   decideConnectorInbox,
   fetchConnectorInbox,
   fetchConnectorInstallations,
@@ -456,18 +457,37 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
   };
   const simulateMappedAggregatorOrder = async (providerName: 'Swiggy' | 'Zomato') => {
     if (!connectorApi || !tenantId || !outletId || simulatorBusy) return;
+    setSimulatorBusy(true);
+    setIncomingError('');
+    try {
     const providerKey = providerName.toLocaleLowerCase();
-    const connector = connectors.find((candidate) => candidate.provider.toLocaleLowerCase().includes(providerKey));
+    let connector = connectors.find((candidate) => candidate.provider.toLocaleLowerCase().includes(providerKey));
     // Older connector drafts did not persist `active`; treat those mappings as
     // enabled so the local test flow keeps working after a configuration reload.
-    const mappings = connector?.configuration?.externalOutlets?.filter((mapping) => mapping.active !== false) ?? [];
+    let mappings = connector?.configuration?.externalOutlets?.filter((mapping) => mapping.active !== false) ?? [];
+    // The outlet owns the virtual-brand mappings, not the aggregator account.
+    // In development, allow Zomato simulation to reuse those mappings and
+    // install a local adapter automatically, so the test flow works without
+    // asking for production API credentials.
+    if (providerName === 'Zomato' && mappings.length === 0 && import.meta.env.DEV) {
+      const sourceConnector = connectors.find((candidate) => candidate.provider.toLocaleLowerCase().includes('swiggy'));
+      const sourceMappings = sourceConnector?.configuration?.externalOutlets?.filter((mapping) => mapping.active !== false) ?? [];
+      if (sourceMappings.length > 0) {
+        if (!connector) {
+          const installed = await createConnectorInstallation(connectorApi, tenantId, outletId, {
+            provider: 'Zomato', manifestVersion: '1.0.0', capabilities: ['orders.read', 'orders.accept'],
+            configuration: { externalOutlets: sourceMappings }, status: 'healthy',
+          });
+          connector = installed;
+          setConnectors((current) => [...current, installed]);
+        }
+        mappings = sourceMappings;
+      }
+    }
     if (!connector || mappings.length === 0) {
       setIncomingError(`Add the ${providerName} restaurant mappings before running the simulator.`);
       return;
     }
-    setSimulatorBusy(true);
-    setIncomingError('');
-    try {
       const now = Date.now();
       const index = Math.floor(Math.random() * mappings.length);
       const mapping = mappings[index];

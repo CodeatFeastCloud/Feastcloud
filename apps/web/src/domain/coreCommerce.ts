@@ -138,6 +138,15 @@ export const fetchPrintJobs = (base: string, tenant: string, outlet: string) => 
 export const fetchPickupTokens = (base: string, tenant: string, outlet: string) => list<PickupToken>(base, '/pickup-tokens', tenant, outlet);
 export const fetchConnectorInbox = (base: string, tenant: string, outlet: string) => list<ConnectorInboxOrder>(base, '/connector-order-inbox', tenant, outlet);
 export const fetchConnectorInstallations = (base: string, tenant: string, outlet: string) => list<ConnectorInstallation>(base, '/connector-installations', tenant, outlet);
+/** Install a local connector adapter used by the development order simulator. */
+export const createConnectorInstallation = (
+  base: string,
+  tenant: string,
+  outlet: string,
+  input: Pick<ConnectorInstallation, 'provider' | 'manifestVersion' | 'capabilities' | 'configuration' | 'status'>,
+) => mutate<ConnectorInstallation>(base, '/connector-installations', tenant, outlet, {
+  id: createUuidV7(), outletId: outlet, ...input,
+});
 export const ingestConnectorOrder = (base: string, tenant: string, outlet: string, connectorId: string, externalOrderId: string, payload: Record<string, unknown>) => mutate<ConnectorInboxOrder>(base, '/connector-order-inbox', tenant, outlet, { id: createUuidV7(), outletId: outlet, connectorId, externalOrderId, payload });
 export async function streamConnectorInbox(base: string, tenant: string, outlet: string, onOrders: (orders: ConnectorInboxOrder[]) => void, signal: AbortSignal): Promise<void> {
   const response = await fetch(`${base}/connector-order-inbox/stream?outletId=${encodeURIComponent(outlet)}`, {
