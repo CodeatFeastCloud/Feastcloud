@@ -1,0 +1,5 @@
+-- SPDX-License-Identifier: AGPL-3.0-only
+BEGIN;
+ALTER TABLE menu_studios DROP CONSTRAINT IF EXISTS menu_studios_current_version_fk;
+DROP TABLE IF EXISTS pickup_token_events,kitchen_print_job_events,pos_checkout_records,order_line_modifier_snapshots,menu_publications,menu_version_item_prices,menu_version_item_modifiers,menu_version_items,menu_modifier_options,menu_modifier_groups,menu_studio_categories,menu_studio_versions,menu_studios;
+COMMIT;

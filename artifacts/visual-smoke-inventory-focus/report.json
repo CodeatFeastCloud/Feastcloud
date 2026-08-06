@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-08-05T09:32:19.083Z",
+  "targetUrl": "http://localhost:5173/?view=inventory",
+  "browser": "Google Chrome",
+  "passed": false,
+  "errorCount": 8,
+  "scenarios": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke-inventory-focus/desktop.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 1100
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "expectedSelector": ".inventory-page",
+        "targetPresent": true,
+        "forbiddenText": "",
+        "forbiddenTextPresent": false,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/inventory-summary?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/inventory-summary?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/recipes"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/recipes"
+        }
+      ]
+    },
+    {
+      "name": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2,
+        "mobile": true
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke-inventory-focus/mobile.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 468,
+        "height": 1178
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "expectedSelector": ".inventory-page",
+        "targetPresent": true,
+        "forbiddenText": "",
+        "forbiddenTextPresent": false,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/inventory-summary?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/recipes"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/inventory-summary?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/recipes"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+BEGIN;
+ALTER TABLE menu_items ALTER COLUMN recipe_id DROP NOT NULL;
+COMMIT;

@@ -1,0 +1,36 @@
+name: Bug report
+description: Report reproducible incorrect behavior
+title: "[bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include customer data, credentials, payment data, or exploitable security details.
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Include the expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide the smallest safe sequence that reproduces the issue.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: FeastCloud version
+    validations:
+      required: true
+  - type: dropdown
+    id: connectivity
+    attributes:
+      label: Connectivity state
+      options: [Online, Offline, Reconnecting, Not applicable]
+    validations:
+      required: true
+

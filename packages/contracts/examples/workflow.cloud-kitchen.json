@@ -1,0 +1,19 @@
+{
+  "id": "in.cloud-kitchen.default",
+  "name": "Multi-brand cloud kitchen",
+  "version": "0.1.0",
+  "serviceModes": ["takeaway", "delivery"],
+  "roles": ["owner", "manager", "dispatcher", "cook", "storekeeper"],
+  "stations": [
+    { "id": "hot-line", "name": "Hot line", "capacity": 12 },
+    { "id": "cold-line", "name": "Cold line", "capacity": 8 },
+    { "id": "beverage", "name": "Beverage", "capacity": 10 },
+    { "id": "expo", "name": "Assembly and expo", "capacity": 20 }
+  ],
+  "ticketFlow": ["queued", "accepted", "preparing", "ready", "completed"],
+  "approvalPolicies": [
+    { "action": "inventory.adjust", "role": "manager" },
+    { "action": "purchase.commit", "role": "manager", "limitMinor": 500000 }
+  ]
+}
+

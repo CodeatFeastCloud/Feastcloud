@@ -1,0 +1,231 @@
+{
+  "generatedAt": "2026-08-05T09:19:27.330Z",
+  "targetUrl": "http://localhost:5173/?view=daily",
+  "browser": "Google Chrome",
+  "passed": false,
+  "errorCount": 32,
+  "scenarios": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke-daily-run/desktop.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 1100
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "expectedSelector": ".daily-page",
+        "targetPresent": true,
+        "forbiddenText": "",
+        "forbiddenTextPresent": false,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/inventory-summary?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/suppliers"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/purchase-orders?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/temperature-logs?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/staff-members"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/checklists?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/shifts?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/suppliers"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/tasks?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/purchase-orders?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/inventory-summary?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/checklists?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/temperature-logs?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/staff-members"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/shifts?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/tasks?outletId=33333333-3333-4333-8333-333333333333"
+        }
+      ]
+    },
+    {
+      "name": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2,
+        "mobile": true
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke-daily-run/mobile.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 2067
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "expectedSelector": ".daily-page",
+        "targetPresent": true,
+        "forbiddenText": "",
+        "forbiddenTextPresent": false,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/suppliers"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/purchase-orders?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/inventory-summary?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/temperature-logs?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/checklists?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/staff-members"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/shifts?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/tasks?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/suppliers"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/purchase-orders?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/temperature-logs?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/inventory-summary?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/checklists?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/staff-members"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/shifts?outletId=33333333-3333-4333-8333-333333333333"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/tasks?outletId=33333333-3333-4333-8333-333333333333"
+        }
+      ]
+    }
+  ]
+}

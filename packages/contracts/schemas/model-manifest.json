@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.feastcloud.org/v1/model-manifest.json",
+  "title": "FeastCloud AI Model Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "task", "license", "source", "artifacts", "approvalStatus", "evaluations"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]+$" },
+    "version": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "task": { "enum": ["assistant", "translation", "speech-recognition", "speech-synthesis", "forecast", "optimization", "vision-ocr"] },
+    "license": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "source": { "type": "string", "format": "uri" },
+    "trainingDataStatement": { "type": "string", "maxLength": 2000 },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["uri", "sha256"],
+        "properties": {
+          "uri": { "type": "string", "format": "uri" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "sizeBytes": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "approvalStatus": { "enum": ["candidate", "evaluation", "approved", "rejected", "retired"] },
+    "evaluations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "result", "evaluatedAt"],
+        "properties": {
+          "name": { "type": "string" },
+          "result": { "type": "string" },
+          "evaluatedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.feastcloud.org/v1/plugin-manifest.json",
+  "title": "FeastCloud Plugin Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "version", "license", "runtime", "permissions", "entrypoint", "sha256"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "license": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "runtime": { "const": "wasm-component-v1" },
+    "permissions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_.:-]+$" }
+    },
+    "entrypoint": { "type": "string", "pattern": "^[A-Za-z0-9_./-]+\\.wasm$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "minimumHostVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+  }
+}
+

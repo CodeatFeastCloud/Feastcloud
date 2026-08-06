@@ -1,0 +1,394 @@
+/*
+ * FeastCloud visual foundation.
+ *
+ * The app contains specialist workspaces, but they share a single service
+ * language: a warm canvas, compact paper cards, ink-blue hierarchy and coral
+ * for the one action that moves work forward. KDS and guest ordering keep
+ * their task-specific contrast without becoming separate products.
+ */
+
+.app > main .menu-page,
+.app > main .organization-control-page { padding-top: 1.75rem; }
+
+.inventory-page, .production-page, .planning-page, .operations-page,
+.daily-page, .commerce-page, .organization-control-page, .menu-page {
+  max-width: 1500px;
+  padding-inline: clamp(1rem, 2vw, 2rem);
+}
+
+.page-heading, .organization-heading, .menu-heading { margin-bottom: 1.15rem; }
+.page-heading h1, .organization-heading h1, .menu-heading h1 { color: var(--ink); letter-spacing: -.05em; }
+
+/* Order desk remains a single readable column once the shell has less than
+   tablet width. Keep this rule in the theme layer so it wins over legacy
+   desktop order-grid declarations loaded by individual modules. */
+@media (max-width: 1080px) {
+  .app > main > .order-page .order-layout { grid-template-columns: minmax(0, 1fr) !important; }
+  .app > main > .order-page .cart-panel { position: static; max-height: none; }
+}
+
+@media (max-width: 900px) {
+  .app > main > .order-page .order-browser { display: block; }
+  .app > main > .order-page .order-category-rail { display: none; }
+  .app > main > .order-page .order-category-select { display: grid; }
+}
+.page-heading p, .organization-heading p, .menu-heading p:not(.eyebrow) { color: var(--ink-muted); }
+
+:is(
+  .inventory-metrics article, .inventory-table-card, .stock-action-card, .recipe-list,
+  .production-queue, .production-plan, .import-panel, .intelligence-panel,
+  .operations-card, .daily-card, .commerce-card, .restaurant-pos, .pos-empty,
+  .aggregator-inbox, .transfer-desk, .org-directory, .org-workspace-head,
+  .org-card, .org-onboarding, .menu-workspace
+) {
+  background: var(--surface);
+  border-color: var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+:is(
+  .inventory-metrics article, .production-card, .commerce-card, .daily-card,
+  .operations-card
+) {
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+:is(
+  .inventory-metrics article, .production-card, .commerce-card, .daily-card,
+  .operations-card
+):hover {
+  border-color: #d2dcd5;
+  box-shadow: 0 11px 25px rgb(34 59 56 / 8%);
+}
+
+:is(
+  .stock-form input, .stock-form select, .production-plan input, .production-plan select,
+  .production-plan textarea, .operations-form input, .operations-form select,
+  .compact-form input, .compact-form select, .commerce-form input,
+  .tender-amount input, .growth-form input, .growth-form select,
+  .transfer-request input, .transfer-request select, .transfer-rule input,
+  .transfer-rule select
+) {
+  color: var(--ink);
+  background: #fff;
+  border-color: var(--line);
+}
+
+:is(
+  .stock-form input, .stock-form select, .production-plan input, .production-plan select,
+  .production-plan textarea, .operations-form input, .operations-form select,
+  .compact-form input, .compact-form select, .commerce-form input,
+  .tender-amount input, .growth-form input, .growth-form select,
+  .transfer-request input, .transfer-request select, .transfer-rule input,
+  .transfer-rule select
+):focus {
+  outline: 0;
+  border-color: var(--brand-action);
+  box-shadow: 0 0 0 3px rgb(201 67 54 / 12%);
+}
+
+:is(
+  .planning-generate, .csv-upload, .stock-form button, .production-card button,
+  .production-plan button, .operations-row button.primary, .operations-form button,
+  .compact-form button, .daily-row button.primary, .commerce-form button,
+  .cash-summary button, .checkout-row button, .growth-form button, .growth-list button
+) { background: var(--brand-action); }
+
+:is(
+  .planning-generate, .csv-upload, .stock-form button, .production-card button,
+  .production-plan button, .operations-row button.primary, .operations-form button,
+  .compact-form button, .daily-row button.primary, .commerce-form button,
+  .cash-summary button, .checkout-row button, .growth-form button, .growth-list button
+):hover:not(:disabled) { background: var(--brand-dark); }
+
+.inventory-focus, .planning-focus, .daily-focus, .commerce-focus,
+.production-focus, .operations-focus { background: #edf1ed; border-color: var(--line); }
+
+.inventory-focus button.active, .planning-focus button.active, .daily-focus button.active,
+.commerce-focus button.active, .production-focus button.active, .operations-focus button.active {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(34 59 56 / 12%);
+}
+
+.inventory-alert, .menu-message.error, .org-message.error {
+  color: #9f392f;
+  background: #fff1ed;
+  border-color: #efc6be;
+}
+
+.inventory-notice, .menu-message.success, .org-message.success, .growth-notice {
+  color: #1e7049;
+  background: #edf8f0;
+  border-color: #cce6d4;
+}
+
+/* Compact, readable data surfaces in Inventory, Planning, Operations, Daily,
+   Commerce, Growth, and Organization. */
+.inventory-table-wrap th, .inventory-table-wrap td { border-color: var(--line); }
+.inventory-table-wrap th { color: var(--ink-muted); }
+.operations-row, .daily-row, .checkout-row, .growth-list > div, .promo-row { border-color: var(--line); }
+.production-card, .recommendation { border-color: var(--line); }
+.section-title h2, .commerce-card h2, .daily-card h2, .operations-card h2 { color: var(--ink); letter-spacing: -.025em; }
+.section-title > span, .eyebrow { color: var(--brand-action); }
+
+/* The manager dashboard already has its own dense layout; this only aligns its
+   palette with the rest of the product. */
+.executive-dashboard {
+  --ed-ink: var(--ink);
+  --ed-muted: var(--ink-muted);
+  --ed-border: var(--line);
+  --ed-brand: var(--brand-action);
+  --ed-brand-deep: var(--brand-dark);
+  --ed-blue: #55789e;
+  --ed-paper: var(--surface);
+}
+
+@media (max-width: 760px) {
+  .app > main .menu-page, .app > main .organization-control-page { padding-top: 1.1rem; }
+  .page-heading, .organization-heading, .menu-heading { align-items: flex-start; flex-direction: column; }
+  .inventory-metrics, .operations-metrics, .daily-metrics { gap: .55rem; }
+}
+
+/* Responsive contract shared by every operational module. Component styles
+   keep their specialist layouts; these rules define how those layouts collapse
+   at tablet and phone widths and prevent any workspace from widening the page. */
+.app > main,
+.app > main > *,
+.app > main :is(section, article, aside, div, form, fieldset) { min-width: 0; }
+
+.app > main :is(p, small, strong, b, span, label) { overflow-wrap: anywhere; }
+
+.app > main :is(.inventory-table-wrap, .menu-table, .menu-import-list, .inbox-order pre) {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 1024px) {
+  .app > main :is(.inventory-page, .production-page, .planning-page, .operations-page, .daily-page, .commerce-page, .growth-page, .organization-control-page, .menu-page) {
+    padding-inline: 1rem;
+  }
+
+  .operations-metrics,
+  .daily-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .growth-grid,
+  .commerce-grid,
+  .operations-grid,
+  .daily-grid,
+  .org-modules-grid { gap: .75rem; }
+
+  .menu-addon-form,
+  .compact-form.po-form,
+  .compact-form.temperature-form,
+  .operations-form.backup-form { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 760px) {
+  .app > main :is(.page, .inventory-page, .production-page, .planning-page, .operations-page, .daily-page, .commerce-page, .growth-page, .organization-control-page, .menu-page) {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem .75rem calc(1.25rem + env(safe-area-inset-bottom));
+  }
+
+  .app > main :is(.page-heading, .organization-heading, .menu-heading) {
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    gap: .8rem;
+    margin-bottom: 1rem;
+  }
+
+  .app > main :is(.page-heading h1, .organization-heading h1, .menu-heading h1) {
+    font-size: clamp(1.65rem, 8vw, 2.15rem);
+    line-height: 1.1;
+  }
+
+  .app > main :is(.page-heading p, .organization-heading p, .menu-heading p:not(.eyebrow)) {
+    font-size: .8rem;
+    line-height: 1.5;
+  }
+
+  .app > main :is(.inventory-focus, .planning-focus, .daily-focus, .commerce-focus, .production-focus, .operations-focus, .menu-tabs) {
+    width: 100%;
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: .2rem;
+    scrollbar-color: #bdc9c2 transparent;
+    scrollbar-width: thin;
+  }
+
+  .app > main :is(.inventory-focus, .planning-focus, .daily-focus, .commerce-focus, .production-focus, .operations-focus, .menu-tabs) > button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    scroll-snap-align: start;
+  }
+
+  .production-focus,
+  .operations-focus {
+    position: static;
+    margin: 0 .75rem .75rem;
+    width: calc(100% - 1.5rem) !important;
+  }
+
+  .inventory-metrics,
+  .operations-metrics,
+  .daily-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .inventory-metrics article,
+  .operations-metrics strong,
+  .daily-metrics strong { min-height: 78px; padding: .8rem; }
+
+  .operations-metrics strong:last-child,
+  .daily-metrics strong:last-child { grid-column: 1 / -1; }
+
+  .planning-grid,
+  .production-layout,
+  .inventory-operations,
+  .operations-grid,
+  .daily-grid,
+  .commerce-grid,
+  .growth-grid,
+  .org-control-grid,
+  .org-directory,
+  .org-modules-grid,
+  .transfer-layout,
+  .pos-layout,
+  .order-layout { grid-template-columns: minmax(0, 1fr); }
+
+  .app > main :is(.inventory-table-card, .stock-action-card, .recipe-list, .production-queue, .production-plan, .import-panel, .intelligence-panel, .operations-card, .daily-card, .commerce-card, .org-directory, .org-card, .menu-workspace) {
+    padding: .85rem;
+    border-radius: 14px;
+  }
+
+  .app > main :is(.stock-form, .production-plan, .operations-form, .compact-form, .commerce-form, .growth-form, .transfer-request, .transfer-rule, .menu-item-form, .menu-form-panel form) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .app > main :is(.operations-row, .daily-row, .checkout-row, .growth-list > div, .promo-row, .cash-summary) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app > main :is(.operations-row, .daily-row, .checkout-row) > button,
+  .app > main :is(.compact-form, .operations-form, .commerce-form, .growth-form) > button { width: 100%; }
+
+  .commerce-form { display: grid; }
+  .cash-summary strong { margin-left: 0; }
+  .table-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .order-page .menu-toolbar { align-items: stretch; flex-direction: column; }
+  .order-page .search-field { width: 100%; min-width: 0; flex-basis: auto; }
+  .order-page .filter-pills { width: 100%; padding-bottom: .2rem; }
+  .order-menu-source { display: flex; align-items: flex-start; flex-direction: column; }
+  .cart-actions { grid-template-columns: 1fr; }
+
+  .menu-workspace { display: block; min-height: 0; padding: 0 !important; }
+  .app > main .menu-tabs > button { padding-inline: .55rem; }
+  .menu-sidebar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    max-height: none;
+    padding: .65rem;
+    overflow-x: auto;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--line);
+    scrollbar-width: none;
+  }
+  .menu-sidebar .menu-search { min-width: min(240px, 72vw); flex: 0 0 auto; padding: 0; }
+  .menu-sidebar > button { min-width: max-content; min-height: 44px; flex: 0 0 auto; }
+  .menu-sidebar-tip { display: none; }
+  .menu-main { padding: .75rem; }
+  .menu-toolbar { align-items: stretch; flex-direction: column; }
+  .menu-toolbar > button { width: 100%; }
+  .menu-table { overflow-x: auto; }
+  .menu-import-list { overflow-x: auto; }
+  .menu-import-list header,
+  .menu-import-list article { min-width: 620px; }
+  .menu-import-saved article { align-items: flex-start; flex-direction: column; }
+  .menu-item-workbench-header { padding: .75rem; }
+  .menu-item-breadcrumb { display: none; }
+  .menu-item-workbench-body { padding: .75rem; }
+  .menu-item-workbench-footer { padding: .7rem .75rem calc(.7rem + env(safe-area-inset-bottom)); }
+
+  .org-identity { align-items: flex-start; }
+  .org-stats { width: 100%; margin-left: 0; overflow-x: auto; }
+  .org-stats strong { min-width: 90px; flex: 1 0 90px; }
+  .org-directory { position: static; max-height: none; }
+  .org-workspace-head { align-items: flex-start; }
+  .org-brand-list article { align-items: flex-start; }
+  .app > main .org-onboarding { margin-top: 0; }
+
+  .transfer-request { border-right: 0; }
+  .transfer-row footer > div { width: 100%; flex-wrap: wrap; }
+  .transfer-row footer button { flex: 1; min-height: 44px; }
+
+  .pos-title { gap: .8rem; }
+  .pos-menu { max-height: none; }
+  .pos-pay button { min-height: 46px; }
+  .inbox-actions { display: grid; grid-template-columns: 1fr; }
+  .inbox-actions input { min-width: 0; width: 100%; }
+  .inbox-actions button { min-height: 44px; }
+}
+
+@media (max-width: 480px) {
+  .app .app-header {
+    grid-template-columns: 40px minmax(0, 1fr);
+    padding-inline: .65rem;
+  }
+
+  .app .outlet-selector select { max-width: 58vw; }
+  .app .header-actions { grid-template-columns: 40px minmax(82px, .8fr) minmax(100px, 1.2fr); }
+
+  .app > main :is(input:not([type='checkbox']):not([type='radio']), select, textarea) { font-size: 16px; }
+
+  .app > main :is(button, [role='button']) { min-height: 44px; }
+
+  .inventory-metrics,
+  .operations-metrics,
+  .daily-metrics,
+  .menu-import-metrics { grid-template-columns: minmax(0, 1fr); }
+
+  .operations-metrics strong:last-child,
+  .daily-metrics strong:last-child { grid-column: auto; }
+
+  .menu-grid { grid-template-columns: minmax(0, 1fr); }
+  .menu-card { grid-template-columns: 88px minmax(0, 1fr); }
+  .menu-art { min-height: 112px; }
+  .menu-addon-form { grid-template-columns: minmax(0, 1fr) !important; }
+  .menu-heading-actions { align-items: stretch; flex-direction: column; }
+  .menu-live, .menu-draft { width: fit-content; }
+  .menu-import-header { gap: .65rem; }
+  .menu-import-status { align-self: stretch; justify-content: center; }
+  .menu-file-grid { grid-template-columns: minmax(0, 1fr); }
+  .menu-item-workbench-header h1 { font-size: .98rem; }
+  .menu-workbench-back { flex: 0 0 auto; }
+  .menu-item-workbench-footer { display: grid; grid-template-columns: 1fr 1fr; }
+
+  .table-grid { grid-template-columns: minmax(0, 1fr); }
+  .pos-menu-item { grid-template-columns: 34px minmax(0, 1fr); }
+  .pos-menu-item > strong { grid-column: 2; }
+  .pos-title { align-items: flex-start; flex-direction: column; }
+  .pos-title > strong { white-space: normal; }
+  .pos-pay { grid-template-columns: minmax(0, 1fr); }
+  .pos-pay button:last-child { grid-column: auto; }
+
+  .guest-order-shell { padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)); }
+  .guest-order-header { padding: 24px 18px; }
+  .guest-order-header::after { opacity: .45; }
+  .guest-menu, .guest-cart { padding: 16px; }
+  .guest-menu article { grid-template-columns: 36px minmax(0, 1fr); }
+  .guest-menu article > span { width: 36px; height: 36px; }
+  .guest-menu article > :last-child { grid-column: 2; justify-self: start; }
+  .guest-stepper { grid-template-columns: 40px 32px 40px; }
+}
+
+@media (pointer: coarse) {
+  :is(button, select, input[type='file'], input[type='checkbox'], input[type='radio']) { touch-action: manipulation; }
+  .app > main button { min-height: 44px; }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "feastcloud.escpos",
+  "name": "ESC/POS printer and cash-drawer adapter",
+  "vendor": "FeastCloud",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "deviceClasses": ["receipt-printer", "kitchen-printer", "cash-drawer"],
+  "transports": ["usb", "tcp", "operating-system"],
+  "protocols": ["escpos"],
+  "permissions": ["devices.discover", "print.jobs.consume", "cash-drawer.open"],
+  "configurationSchema": "https://schemas.feastcloud.org/v1/hardware/escpos-configuration.json",
+  "healthCheck": {
+    "intervalSeconds": 30,
+    "timeoutMilliseconds": 2000
+  },
+  "artifacts": []
+}

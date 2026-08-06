@@ -1,0 +1,21 @@
+{
+  "locale": "en-IN",
+  "name": "English (India)",
+  "direction": "ltr",
+  "version": "0.1.0",
+  "certification": {
+    "ui": "reviewed",
+    "operations": "draft",
+    "speechInput": "draft",
+    "speechOutput": "unsupported"
+  },
+  "messages": {
+    "app.name": "FeastCloud",
+    "nav.orders": "Orders",
+    "nav.kitchen": "Kitchen",
+    "ticket.accept": "Accept",
+    "ticket.start": "Start",
+    "ticket.ready": "Ready"
+  }
+}
+

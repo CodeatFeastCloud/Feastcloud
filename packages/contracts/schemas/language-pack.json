@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.feastcloud.org/v1/language-pack.json",
+  "title": "FeastCloud Language Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["locale", "name", "direction", "version", "certification", "messages"],
+  "properties": {
+    "locale": { "type": "string", "pattern": "^[a-z]{2,3}(?:-[A-Z][a-z]{3})?(?:-[A-Z]{2}|-[0-9]{3})?$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "direction": { "enum": ["ltr", "rtl"] },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "fallbackLocale": { "type": "string" },
+    "certification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ui", "operations", "speechInput", "speechOutput"],
+      "properties": {
+        "ui": { "$ref": "#/$defs/status" },
+        "operations": { "$ref": "#/$defs/status" },
+        "speechInput": { "$ref": "#/$defs/status" },
+        "speechOutput": { "$ref": "#/$defs/status" }
+      }
+    },
+    "messages": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "status": { "enum": ["unsupported", "draft", "reviewed", "certified"] }
+  }
+}
+

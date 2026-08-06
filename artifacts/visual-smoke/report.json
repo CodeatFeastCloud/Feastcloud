@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-08-03T16:40:46.124Z",
+  "targetUrl": "http://127.0.0.1:5173/?view=overview",
+  "browser": "Google Chrome",
+  "passed": true,
+  "errorCount": 0,
+  "scenarios": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke/desktop.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 1330
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "dashboardPresent": true,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": []
+    },
+    {
+      "name": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2,
+        "mobile": true
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke/mobile.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 3278
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "dashboardPresent": true,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": []
+    }
+  ]
+}

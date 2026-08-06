@@ -1,0 +1,115 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  web-and-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run security:node
+      - run: npm run sbom:web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-cyclonedx-sbom
+          path: dist/sbom/web.cdx.json
+
+  go-services:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.10-alpine3.22
+        env:
+          POSTGRES_DB: feastcloud
+          POSTGRES_USER: feastcloud_admin
+          POSTGRES_PASSWORD: feastcloud_dev_admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U feastcloud_admin -d feastcloud"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache-dependency-path: |
+            services/core/go.sum
+            services/edge/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+      - name: Apply core migrations and restricted runtime bootstrap
+        env:
+          PGPASSWORD: feastcloud_dev_admin
+        run: |
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000001_foundation.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000002_domain_events.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000003_nullable_organization_audit.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000004_identity_devices.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000005_kitchen_graph_inventory.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000006_inventory_counts.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000007_production_batches.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000008_imports_planning.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000009_operational_resilience_reconciliation.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000010_daily_operations_mvp.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000011_native_commerce.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000012_guest_growth_refunds.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000013_daily_dashboard_indexes.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000014_connected_commerce.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000015_restaurant_core.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000016_aggregator_inbox_decisions.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000017_qr_web_order_requests.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000018_stock_transfer_execution.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000019_replenishment_rules.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f services/core/migrations/000020_brand_outlet_assignments.up.sql
+          psql -h 127.0.0.1 -U feastcloud_admin -d feastcloud -v ON_ERROR_STOP=1 -f deploy/postgres/003_development_bootstrap.sql
+      - name: Test Go services with PostgreSQL and race detection
+        env:
+          FEASTCLOUD_TEST_DATABASE_URL: postgres://feastcloud_runtime:feastcloud_dev_runtime@127.0.0.1:5432/feastcloud?sslmode=disable
+        run: go test -race ./services/core/... ./services/edge/...
+      - run: go vet ./services/core/... ./services/edge/...
+      - run: npm run smoke:connected
+      - name: Verify terminal edge-to-PostgreSQL synchronization
+        env:
+          FEASTCLOUD_TEST_DATABASE_URL: postgres://feastcloud_runtime:feastcloud_dev_runtime@127.0.0.1:5432/feastcloud?sslmode=disable
+        run: npm run smoke:postgres
+      - run: npm run licenses:go
+      - run: npm run security:go
+      - run: npm run sbom:core
+      - run: npm run sbom:edge
+      - name: Verify Go formatting
+        run: test -z "$(gofmt -l services/core services/edge)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: go-cyclonedx-sboms
+          path: dist/sbom/*.cdx.json
+
+  protobuf-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update
+      - run: sudo apt-get install --yes protobuf-compiler
+      - run: >-
+          protoc -I packages/contracts/proto
+          --descriptor_set_out=/tmp/feastcloud-sync.pb
+          packages/contracts/proto/feastcloud/sync/v1/sync.proto

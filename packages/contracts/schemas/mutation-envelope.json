@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.feastcloud.org/v1/mutation-envelope.json",
+  "title": "FeastCloud Mutation Envelope",
+  "description": "Canonical metadata carried by every state-changing operation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "tenantId",
+    "outletId",
+    "deviceId",
+    "actorId",
+    "occurredAt",
+    "source",
+    "schemaVersion",
+    "idempotencyKey",
+    "payload"
+  ],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "tenantId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "outletId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "deviceId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "actorId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "source": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "sourceId": { "type": "string", "maxLength": 256 },
+    "schemaVersion": { "type": "string", "pattern": "^[1-9][0-9]*\\.[0-9]+$" },
+    "idempotencyKey": { "type": "string", "minLength": 8, "maxLength": 256 },
+    "causationId": { "type": "string", "format": "uuid" },
+    "correlationId": { "type": "string", "format": "uuid" },
+    "payload": { "type": "object" }
+  }
+}
+

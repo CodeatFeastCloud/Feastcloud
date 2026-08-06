@@ -1,0 +1,140 @@
+// SPDX-License-Identifier: Apache-2.0
+syntax = "proto3";
+
+package feastcloud.sync.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/feastcloud/feastcloud/packages/contracts/gen/go/sync/v1;syncv1";
+
+// EdgeSync is the version-negotiated, at-least-once transport between one
+// outlet edge authority and the cloud inbox. Business effects are idempotent.
+service EdgeSync {
+  rpc Hello(HelloRequest) returns (HelloResponse);
+  rpc PushOperations(PushOperationsRequest) returns (PushOperationsResponse);
+  rpc PullChanges(PullChangesRequest) returns (ChangeBatch);
+  rpc Acknowledge(AcknowledgeRequest) returns (AcknowledgeResponse);
+  rpc GetSnapshot(SnapshotRequest) returns (SnapshotResponse);
+}
+
+message MutationContext {
+  string id = 1;
+  string tenant_id = 2;
+  string outlet_id = 3;
+  string device_id = 4;
+  string actor_id = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+  string source = 7;
+  string source_id = 8;
+  string schema_version = 9;
+  string idempotency_key = 10;
+  string causation_id = 11;
+  string correlation_id = 12;
+}
+
+message EdgeOperation {
+  string operation_id = 1;
+  string aggregate_type = 2;
+  string aggregate_id = 3;
+  uint64 aggregate_version = 4;
+  string command_type = 5;
+  MutationContext mutation = 6;
+  google.protobuf.Struct payload = 7;
+}
+
+message HelloRequest {
+  string edge_id = 1;
+  string tenant_id = 2;
+  string outlet_id = 3;
+  string software_version = 4;
+  repeated string protocol_versions = 5;
+  string last_cloud_cursor = 6;
+  repeated string capabilities = 7;
+}
+
+message HelloResponse {
+  string selected_protocol_version = 1;
+  google.protobuf.Timestamp cloud_time = 2;
+  string minimum_software_version = 3;
+  bool upgrade_required = 4;
+}
+
+message PushOperationsRequest {
+  string batch_id = 1;
+  string edge_id = 2;
+  string outlet_id = 3;
+  repeated EdgeOperation operations = 4;
+}
+
+enum OperationStatus {
+  OPERATION_STATUS_UNSPECIFIED = 0;
+  OPERATION_STATUS_ACCEPTED = 1;
+  OPERATION_STATUS_DUPLICATE = 2;
+  OPERATION_STATUS_REJECTED = 3;
+  OPERATION_STATUS_CONFLICT = 4;
+  OPERATION_STATUS_RETRY = 5;
+}
+
+message OperationResult {
+  string operation_id = 1;
+  OperationStatus status = 2;
+  string problem_code = 3;
+  uint32 retry_after_seconds = 4;
+  uint64 committed_aggregate_version = 5;
+}
+
+message PushOperationsResponse {
+  string batch_id = 1;
+  repeated OperationResult results = 2;
+}
+
+message PullChangesRequest {
+  string edge_id = 1;
+  string outlet_id = 2;
+  string after_cursor = 3;
+  uint32 limit = 4;
+}
+
+message CloudChange {
+  string change_id = 1;
+  string resource_type = 2;
+  string resource_id = 3;
+  uint64 resource_version = 4;
+  string schema_version = 5;
+  google.protobuf.Struct payload = 6;
+}
+
+message ChangeBatch {
+  string next_cursor = 1;
+  repeated CloudChange changes = 2;
+  bool has_more = 3;
+  bool snapshot_required = 4;
+}
+
+message AcknowledgeRequest {
+  string edge_id = 1;
+  string outlet_id = 2;
+  string cursor = 3;
+}
+
+message AcknowledgeResponse {
+  string acknowledged_cursor = 1;
+}
+
+message SnapshotRequest {
+  string edge_id = 1;
+  string outlet_id = 2;
+  repeated string resource_sets = 3;
+  string known_snapshot_id = 4;
+}
+
+message SnapshotResponse {
+  string snapshot_id = 1;
+  string schema_version = 2;
+  bytes compressed_payload = 3;
+  bytes signature = 4;
+  string signing_key_id = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+

@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+
+name: feastcloud-development
+
+services:
+  postgres:
+    image: postgres:17.10-alpine3.22
+    environment:
+      POSTGRES_DB: feastcloud
+      POSTGRES_USER: feastcloud_admin
+      POSTGRES_PASSWORD: feastcloud_dev_admin
+    ports:
+      - "127.0.0.1:${FEASTCLOUD_POSTGRES_PORT:-54329}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U feastcloud_admin -d feastcloud"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    volumes:
+      - feastcloud_postgres_data:/var/lib/postgresql/data
+      - ./services/core/migrations/000001_foundation.up.sql:/docker-entrypoint-initdb.d/001_foundation.sql:ro
+      - ./services/core/migrations/000002_domain_events.up.sql:/docker-entrypoint-initdb.d/002_domain_events.sql:ro
+      - ./services/core/migrations/000003_nullable_organization_audit.up.sql:/docker-entrypoint-initdb.d/003_nullable_organization_audit.sql:ro
+      - ./services/core/migrations/000004_identity_devices.up.sql:/docker-entrypoint-initdb.d/004_identity_devices.sql:ro
+      - ./services/core/migrations/000005_kitchen_graph_inventory.up.sql:/docker-entrypoint-initdb.d/005_kitchen_graph_inventory.sql:ro
+      - ./services/core/migrations/000006_inventory_counts.up.sql:/docker-entrypoint-initdb.d/006_inventory_counts.sql:ro
+      - ./services/core/migrations/000007_production_batches.up.sql:/docker-entrypoint-initdb.d/007_production_batches.sql:ro
+      - ./services/core/migrations/000008_imports_planning.up.sql:/docker-entrypoint-initdb.d/008_imports_planning.sql:ro
+      - ./services/core/migrations/000009_operational_resilience_reconciliation.up.sql:/docker-entrypoint-initdb.d/009_operational_resilience.sql:ro
+      - ./services/core/migrations/000010_daily_operations_mvp.up.sql:/docker-entrypoint-initdb.d/010_daily_operations.sql:ro
+      - ./services/core/migrations/000011_native_commerce.up.sql:/docker-entrypoint-initdb.d/011_native_commerce.sql:ro
+      - ./services/core/migrations/000012_guest_growth_refunds.up.sql:/docker-entrypoint-initdb.d/012_guest_growth_refunds.sql:ro
+      - ./services/core/migrations/000013_daily_dashboard_indexes.up.sql:/docker-entrypoint-initdb.d/013_daily_dashboard_indexes.sql:ro
+      - ./services/core/migrations/000014_connected_commerce.up.sql:/docker-entrypoint-initdb.d/014_connected_commerce.sql:ro
+      - ./services/core/migrations/000015_restaurant_core.up.sql:/docker-entrypoint-initdb.d/015_restaurant_core.sql:ro
+      - ./services/core/migrations/000016_aggregator_inbox_decisions.up.sql:/docker-entrypoint-initdb.d/016_aggregator_inbox_decisions.sql:ro
+      - ./services/core/migrations/000017_qr_web_order_requests.up.sql:/docker-entrypoint-initdb.d/017_qr_web_order_requests.sql:ro
+      - ./services/core/migrations/000018_stock_transfer_execution.up.sql:/docker-entrypoint-initdb.d/018_stock_transfer_execution.sql:ro
+      - ./services/core/migrations/000019_replenishment_rules.up.sql:/docker-entrypoint-initdb.d/019_replenishment_rules.sql:ro
+      - ./services/core/migrations/000020_brand_outlet_assignments.up.sql:/docker-entrypoint-initdb.d/020_brand_outlet_assignments.sql:ro
+      - ./services/core/migrations/000021_menu_import_drafts.up.sql:/docker-entrypoint-initdb.d/021_menu_import_drafts.sql:ro
+      - ./services/core/migrations/000022_optional_menu_item_recipe.up.sql:/docker-entrypoint-initdb.d/022_optional_menu_item_recipe.sql:ro
+      - ./services/core/migrations/000023_connector_external_outlets.up.sql:/docker-entrypoint-initdb.d/023_connector_external_outlets.sql:ro
+      - ./deploy/postgres/003_development_bootstrap.sql:/docker-entrypoint-initdb.d/023_development_bootstrap.sql:ro
+    restart: unless-stopped
+
+volumes:
+  feastcloud_postgres_data:

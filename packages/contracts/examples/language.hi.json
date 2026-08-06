@@ -1,0 +1,22 @@
+{
+  "locale": "hi-IN",
+  "name": "हिन्दी",
+  "direction": "ltr",
+  "version": "0.1.0",
+  "fallbackLocale": "en-IN",
+  "certification": {
+    "ui": "draft",
+    "operations": "draft",
+    "speechInput": "draft",
+    "speechOutput": "unsupported"
+  },
+  "messages": {
+    "app.name": "FeastCloud",
+    "nav.orders": "ऑर्डर",
+    "nav.kitchen": "रसोई",
+    "ticket.accept": "स्वीकार करें",
+    "ticket.start": "शुरू करें",
+    "ticket.ready": "तैयार"
+  }
+}
+

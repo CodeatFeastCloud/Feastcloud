@@ -1,0 +1,8 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+
+go 1.24.0
+
+use (
+	./services/core
+	./services/edge
+)

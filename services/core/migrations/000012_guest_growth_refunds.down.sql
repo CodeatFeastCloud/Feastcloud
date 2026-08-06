@@ -1,0 +1,1 @@
+BEGIN;DROP TABLE IF EXISTS loyalty_events,loyalty_accounts,promotion_redemptions,promotions,reservations,guest_consent_events,guest_profiles;ALTER TABLE cash_events DROP CONSTRAINT IF EXISTS cash_events_event_type_check;ALTER TABLE cash_events ADD CONSTRAINT cash_events_event_type_check CHECK(event_type IN('opening_float','cash_sale','cash_in','cash_out','closing_count'));COMMIT;

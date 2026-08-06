@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0",
+  "models": [
+    {
+      "id": "Qwen/Qwen3",
+      "version": "candidate-unpinned",
+      "task": "assistant",
+      "license": "Apache-2.0",
+      "source": "https://huggingface.co/Qwen",
+      "trainingDataStatement": "Deployment is blocked until a specific checkpoint, checksum, model card, and FeastCloud safety evaluation are attached.",
+      "artifacts": [],
+      "approvalStatus": "candidate",
+      "evaluations": []
+    },
+    {
+      "id": "AI4Bharat/IndicTrans2",
+      "version": "candidate-unpinned",
+      "task": "translation",
+      "license": "MIT",
+      "source": "https://github.com/AI4Bharat/IndicTrans2",
+      "trainingDataStatement": "Certification requires a pinned checkpoint plus native-speaker review of safety-critical kitchen terminology.",
+      "artifacts": [],
+      "approvalStatus": "candidate",
+      "evaluations": []
+    },
+    {
+      "id": "openai/whisper",
+      "version": "candidate-unpinned",
+      "task": "speech-recognition",
+      "license": "MIT",
+      "source": "https://github.com/openai/whisper",
+      "trainingDataStatement": "Deployment is blocked until a checkpoint and checksum pass kitchen-noise, accent, and food-safety vocabulary evaluations.",
+      "artifacts": [],
+      "approvalStatus": "candidate",
+      "evaluations": []
+    }
+  ]
+}

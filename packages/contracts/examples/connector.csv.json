@@ -1,0 +1,16 @@
+{
+  "id": "feastcloud.csv-import",
+  "name": "CSV order import",
+  "provider": "FeastCloud",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "capabilities": ["catalog.read", "orders.read"],
+  "permissions": ["imports.read", "orders.create"],
+  "healthEndpoint": "/healthz",
+  "retryPolicy": {
+    "maxAttempts": 8,
+    "initialBackoffMs": 500,
+    "maxBackoffMs": 60000
+  }
+}
+

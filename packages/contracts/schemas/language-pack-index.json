@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.feastcloud.org/v1/language-pack-index.json",
+  "title": "FeastCloud Language Pack Index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "packs"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "packs": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["locale", "url", "sha256"],
+        "properties": {
+          "locale": { "type": "string", "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$" },
+          "url": { "type": "string", "format": "uri-reference" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    }
+  }
+}

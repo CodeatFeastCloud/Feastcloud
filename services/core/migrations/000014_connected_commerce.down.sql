@@ -1,0 +1,4 @@
+-- SPDX-License-Identifier: AGPL-3.0-only
+BEGIN;
+DROP TABLE IF EXISTS implementation_runbooks,hardware_devices,outlet_control_profiles,stock_transfer_lines,stock_transfers,qr_ordering_links,pickup_tokens,kitchen_print_jobs,station_capacity_limits,connector_order_inbox,connector_installations,channel_menu_items,sales_channels;
+COMMIT;

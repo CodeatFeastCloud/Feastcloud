@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.feastcloud.org/v1/connector-manifest.json",
+  "title": "FeastCloud Connector Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "version", "license", "capabilities", "permissions", "retryPolicy"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "provider": { "type": "string", "maxLength": 100 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$" },
+    "license": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["catalog.read", "catalog.write", "orders.read", "orders.write", "availability.write", "payments.read", "fulfillment.write", "guests.read", "folios.write", "accounting.write"]
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_.:-]+$" }
+    },
+    "healthEndpoint": { "type": "string", "format": "uri-reference" },
+    "retryPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxAttempts", "initialBackoffMs", "maxBackoffMs"],
+      "properties": {
+        "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "initialBackoffMs": { "type": "integer", "minimum": 100, "maximum": 60000 },
+        "maxBackoffMs": { "type": "integer", "minimum": 100, "maximum": 86400000 }
+      }
+    }
+  }
+}
+

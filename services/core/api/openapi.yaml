@@ -1,0 +1,1277 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+
+openapi: 3.1.0
+info:
+  title: FeastCloud Core API
+  version: 0.1.0
+  description: Phase 0 tenant-safe organization, kitchen, order, audit, and edge-inbox API.
+  license:
+    name: AGPL-3.0-only
+    identifier: AGPL-3.0-only
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Platform
+  - name: Organization
+  - name: Kitchen
+  - name: Commerce
+  - name: Guest
+  - name: Analytics
+  - name: Operations
+  - name: Commerce
+  - name: Audit
+  - name: Sync
+paths:
+  /healthz:
+    get:
+      tags: [Platform]
+      operationId: health
+      security: []
+      responses:
+        "200":
+          description: The process is healthy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /readyz:
+    get:
+      tags: [Platform]
+      operationId: readiness
+      security: []
+      responses:
+        "200":
+          description: The process is ready to receive traffic.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /api/v1:
+    get:
+      tags: [Platform]
+      operationId: discoverV1
+      security: []
+      responses:
+        "200":
+          description: V1 resource discovery.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseEnvelope"
+  /api/v1/organizations:
+    get:
+      tags: [Organization]
+      operationId: listOrganizations
+      parameters:
+        - $ref: "#/components/parameters/TenantFilter"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          $ref: "#/components/responses/Collection"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      tags: [Organization]
+      operationId: createOrganization
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/MutationEnvelope"
+                - type: object
+                  properties:
+                    payload:
+                      $ref: "#/components/schemas/OrganizationInput"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        default:
+          $ref: "#/components/responses/Problem"
+  /api/v1/organizations/{id}:
+    get:
+      tags: [Organization]
+      operationId: getOrganization
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/TenantFilter"
+      responses:
+        "200":
+          $ref: "#/components/responses/Entity"
+        default:
+          $ref: "#/components/responses/Problem"
+  /api/v1/outlets:
+    get:
+      tags: [Organization]
+      operationId: listOutlets
+      parameters:
+        - $ref: "#/components/parameters/TenantFilter"
+        - name: organizationId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/Collection" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [Organization]
+      operationId: createOutlet
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody:
+        $ref: "#/components/requestBodies/Mutation"
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/outlets/{id}:
+    get:
+      tags: [Organization]
+      operationId: getOutlet
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/TenantFilter"
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/brands:
+    get:
+      tags: [Organization]
+      operationId: listBrands
+      parameters:
+        - $ref: "#/components/parameters/TenantFilter"
+        - name: organizationId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/Collection" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [Organization]
+      operationId: createBrand
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/brands/{id}:
+    get:
+      tags: [Organization]
+      operationId: getBrand
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/TenantFilter"
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/brand-outlet-assignments:
+    get:
+      tags: [Organization]
+      operationId: listBrandOutletAssignments
+      description: Lists controlled brand deployments. A brand is not sellable at an outlet until an active assignment exists.
+      parameters:
+        - $ref: "#/components/parameters/TenantFilter"
+        - name: brandId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: "#/components/parameters/OutletFilter"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/Collection" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [Organization]
+      operationId: setBrandOutletAssignment
+      description: Creates a controlled brand deployment or changes its active state. Updates require the current record version; create uses expectedVersion 0.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/MutationEnvelope"
+                - type: object
+                  properties:
+                    payload: { $ref: "#/components/schemas/BrandOutletAssignmentInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/platform/tenants:
+    post:
+      tags: [Platform]
+      operationId: provisionTenant
+      description: >-
+        FeastCloud-operator-only onboarding command. It atomically creates a
+        customer tenant, organization root, first outlet, first brand, active
+        outlet rollout, and template stations. Requires the platform_admin role.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/MutationEnvelope"
+                - type: object
+                  properties:
+                    payload: { $ref: "#/components/schemas/TenantProvisionInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/stations:
+    get:
+      tags: [Kitchen]
+      operationId: listStations
+      parameters:
+        - $ref: "#/components/parameters/TenantFilter"
+        - $ref: "#/components/parameters/OutletFilter"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/Collection" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [Kitchen]
+      operationId: createStation
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/stations/{id}:
+    get:
+      tags: [Kitchen]
+      operationId: getStation
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/TenantFilter"
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/orders:
+    get:
+      tags: [Commerce]
+      operationId: listOrders
+      parameters:
+        - $ref: "#/components/parameters/TenantFilter"
+        - $ref: "#/components/parameters/OutletFilter"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/Collection" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [Commerce]
+      operationId: createOrder
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/orders/{id}:
+    get:
+      tags: [Commerce]
+      operationId: getOrder
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/TenantFilter"
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/orders/{id}/transitions:
+    post:
+      tags: [Commerce]
+      operationId: transitionOrderStatus
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody:
+        $ref: "#/components/requestBodies/OrderTransition"
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/kitchen-tickets:
+    get:
+      tags: [Kitchen]
+      operationId: listKitchenTickets
+      parameters:
+        - $ref: "#/components/parameters/TenantFilter"
+        - $ref: "#/components/parameters/OutletFilter"
+        - name: orderId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: stationId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/Collection" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [Kitchen]
+      operationId: createKitchenTicket
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/kitchen-tickets/{id}:
+    get:
+      tags: [Kitchen]
+      operationId: getKitchenTicket
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/TenantFilter"
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/kitchen-tickets/{id}/transitions:
+    post:
+      tags: [Kitchen]
+      operationId: transitionKitchenTicketStatus
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody:
+        $ref: "#/components/requestBodies/TicketTransition"
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/audit-events:
+    get:
+      tags: [Audit]
+      operationId: listAuditEvents
+      parameters:
+        - $ref: "#/components/parameters/TenantFilter"
+        - $ref: "#/components/parameters/OutletFilter"
+        - name: entityType
+          in: query
+          schema: { type: string }
+        - name: entityId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/Collection" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/units:
+    get:
+      tags: [Kitchen]
+      operationId: listUnits
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Kitchen]
+      operationId: createUnit
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/ingredients:
+    get:
+      tags: [Kitchen]
+      operationId: listIngredients
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Kitchen]
+      operationId: createIngredient
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/recipes:
+    get:
+      tags: [Kitchen]
+      operationId: listRecipes
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Kitchen]
+      operationId: createRecipe
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/recipes/{id}/versions:
+    post:
+      tags: [Kitchen]
+      operationId: addRecipeVersion
+      parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/menu-items:
+    get:
+      tags: [Commerce]
+      operationId: listMenuItems
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Commerce]
+      operationId: createMenuItem
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/inventory-events:
+    post:
+      tags: [Kitchen]
+      operationId: appendInventoryEvent
+      description: Appends immutable receiving, waste, spoilage, transfer, production, staff-meal, or reversal evidence. Physical counts use the atomic inventory-counts workflow.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/inventory-counts:
+    post:
+      tags: [Kitchen]
+      operationId: completeInventoryCount
+      description: Records immutable physical-count evidence and atomically posts costed variance adjustments against the current ledger balance.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/inventory-summary:
+    get:
+      tags: [Kitchen]
+      operationId: inventorySummary
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/production-batches:
+    get:
+      tags: [Kitchen]
+      operationId: listProductionBatches
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Kitchen]
+      operationId: planProductionBatch
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/production-batches/{id}/transitions:
+    post:
+      tags: [Kitchen]
+      operationId: transitionProductionBatch
+      description: Starts, completes, or cancels a batch using expectedVersion. Completion consumes the fixed recipe version and receives actual yield into inventory atomically.
+      parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/order-imports:
+    get:
+      tags: [Commerce]
+      operationId: listOrderImports
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }, { $ref: "#/components/parameters/Limit" }, { $ref: "#/components/parameters/Cursor" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Commerce]
+      operationId: importCsvOrders
+      description: Records file fingerprint and row-level reconciliation evidence while creating valid orders, recipe snapshots, and station tickets atomically.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/menu-imports:
+    get:
+      tags: [Commerce]
+      operationId: listMenuImportDrafts
+      description: Returns immutable third-party menu imports. The latest applied import is the active sellable menu; recipe and station links remain optional and may be completed later.
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }, { $ref: "#/components/parameters/Limit" }, { $ref: "#/components/parameters/Cursor" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Commerce]
+      operationId: applyMenuImport
+      description: Idempotently saves and activates a canonical menu export using its source checksum. Re-uploading the same canonical menu returns the existing import.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/planning-runs:
+    get:
+      tags: [Analytics]
+      operationId: listPlanningRuns
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }, { $ref: "#/components/parameters/Limit" }, { $ref: "#/components/parameters/Cursor" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Analytics]
+      operationId: generatePlanningRun
+      description: Persists observe-only demand forecasts, preparation suggestions, stockout warnings, evidence, confidence, and model version.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/dashboard/daily:
+    get:
+      tags: [Analytics]
+      operationId: getDailyManagerDashboard
+      description: Returns a PostgreSQL ledger-backed manager dashboard for one outlet-local calendar date. Receipt, order, and tender event cohorts remain explicitly separate; unsupported channel and leakage facts are named in unavailableFields.
+      parameters:
+        - name: outletId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: date
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: A tenant- and outlet-scoped daily dashboard read snapshot.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyDashboardEnvelope" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/configuration-snapshots:
+    get:
+      tags: [Operations]
+      operationId: listConfigurationSnapshots
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }, { $ref: "#/components/parameters/Limit" }, { $ref: "#/components/parameters/Cursor" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Operations]
+      operationId: publishSignedConfigurationSnapshot
+      description: Canonicalizes and signs an immutable outlet configuration snapshot with Ed25519.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/edge-checkpoints:
+    get:
+      tags: [Operations]
+      operationId: listEdgeSyncCheckpoints
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/reconciliation-cases:
+    get:
+      tags: [Operations]
+      operationId: listReconciliationCases
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/reconciliation-cases/{id}/actions:
+    post:
+      tags: [Operations]
+      operationId: actOnReconciliationCase
+      description: Assigns, retries, resolves, dismisses, or reopens a case using expectedVersion.
+      parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/incidents:
+    get:
+      tags: [Operations]
+      operationId: listOperationalIncidents
+      parameters: [{ $ref: "#/components/parameters/OutletFilter" }]
+      responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Operations]
+      operationId: reportOperationalIncident
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/incidents/{id}/actions:
+    post:
+      tags: [Operations]
+      operationId: transitionOperationalIncident
+      description: Moves an incident through open, monitoring, and resolved states using expectedVersion.
+      parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/backup-evidence:
+    get:
+      tags: [Operations]
+      operationId: listBackupAndRestoreEvidence
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } }
+    post:
+      tags: [Operations]
+      operationId: recordBackupManifest
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/restore-drills:
+    post:
+      tags: [Operations]
+      operationId: recordRestoreDrill
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/suppliers:
+    get: { tags: [Operations], operationId: listSuppliers, responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Operations], operationId: createSupplier, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/purchase-orders:
+    get: { tags: [Operations], operationId: listPurchaseOrders, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Operations], operationId: createPurchaseOrder, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/purchase-orders/{id}/transitions:
+    post: { tags: [Operations], operationId: transitionPurchaseOrder, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/goods-receipts:
+    post:
+      tags: [Operations]
+      operationId: receivePurchaseOrder
+      description: Atomically records immutable receipt evidence, advances received quantities, and posts inventory ledger receipts.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/temperature-logs:
+    get: { tags: [Operations], operationId: listTemperatureLogs, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Operations], operationId: recordTemperatureLog, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/checklists:
+    get: { tags: [Operations], operationId: listOperationalChecklists, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Operations], operationId: createOperationalChecklist, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/checklists/{id}/items/{itemId}/complete:
+    post:
+      tags: [Operations]
+      operationId: completeChecklistItem
+      parameters: [{ $ref: "#/components/parameters/ResourceID" }, { name: itemId, in: path, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/staff-members:
+    get: { tags: [Operations], operationId: listStaffMembers, responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Operations], operationId: createStaffMember, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/shifts:
+    get: { tags: [Operations], operationId: listStaffShifts, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Operations], operationId: createStaffShift, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/shifts/{id}/transitions:
+    post: { tags: [Operations], operationId: transitionStaffShift, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/tasks:
+    get: { tags: [Operations], operationId: listOperationalTasks, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Operations], operationId: createOperationalTask, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/tasks/{id}/transitions:
+    post: { tags: [Operations], operationId: transitionOperationalTask, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/menu-availability:
+    get: { tags: [Commerce], operationId: listMenuAvailability, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Commerce], operationId: setMenuAvailability, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/dining-tables:
+    get: { tags: [Commerce], operationId: listDiningTables, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Commerce], operationId: createDiningTable, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/dining-tables/{id}/transitions:
+    post: { tags: [Commerce], operationId: transitionDiningTable, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/dining-sessions:
+    get: { tags: [Commerce], operationId: listDiningSessions, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Commerce], operationId: openDiningSession, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/dining-sessions/{id}/close:
+    post: { tags: [Commerce], operationId: closeDiningSession, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/cash-shifts:
+    get: { tags: [Commerce], operationId: listCashShifts, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Commerce], operationId: openCashShift, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/cash-shifts/{id}/close:
+    post: { tags: [Commerce], operationId: closeCashShift, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/tenders:
+    get: { tags: [Commerce], operationId: listTenders, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post:
+      tags: [Commerce]
+      operationId: captureTender
+      description: Captures a cash, UPI, terminal, or external tender without card data and issues an immutable fiscal receipt once fully paid.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/Mutation" }
+      responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } }
+  /api/v1/tenders/{id}/reverse:
+    post: { tags: [Commerce], operationId: reverseTender, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/tender-settlements:
+    post: { tags: [Commerce], operationId: generateTenderSettlement, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/guests:
+    get: { tags: [Guest], operationId: listGuests, responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Guest], operationId: createGuest, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/guests/{id}/consent:
+    post: { tags: [Guest], operationId: setGuestConsent, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/reservations:
+    get: { tags: [Guest], operationId: listReservations, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Guest], operationId: createReservation, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/reservations/{id}/transitions:
+    post: { tags: [Guest], operationId: transitionReservation, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/promotions:
+    get: { tags: [Guest], operationId: listPromotions, parameters: [{ $ref: "#/components/parameters/OutletFilter" }], responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+    post: { tags: [Guest], operationId: createPromotion, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/promotions/redeem:
+    post: { tags: [Guest], operationId: redeemPromotion, parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/loyalty-accounts:
+    get: { tags: [Guest], operationId: listLoyaltyAccounts, responses: { "200": { $ref: "#/components/responses/Collection" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/loyalty-accounts/{id}/events:
+    post: { tags: [Guest], operationId: adjustLoyalty, parameters: [{ $ref: "#/components/parameters/ResourceID" }, { $ref: "#/components/parameters/IdempotencyKey" }], requestBody: { $ref: "#/components/requestBodies/Mutation" }, responses: { "201": { $ref: "#/components/responses/Created" }, default: { $ref: "#/components/responses/Problem" } } }
+  /api/v1/devices:
+    post:
+      tags: [Platform]
+      operationId: enrollOutletDevice
+      description: Enrolls an outlet edge certificate fingerprint. Owner or manager role required.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MutationEnvelope" }
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/devices/{id}/revoke:
+    post:
+      tags: [Platform]
+      operationId: revokeOutletDevice
+      description: Revokes an enrolled certificate immediately. Owner or manager role required.
+      parameters:
+        - $ref: "#/components/parameters/ResourceID"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MutationEnvelope" }
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Problem" }
+  /api/v1/sync/operations:
+    post:
+      tags: [Sync]
+      operationId: pushOperations
+      security:
+        - OutletDeviceCertificate: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PushOperationsRequest"
+      responses:
+        "200":
+          description: >-
+            One result per operation. PostgreSQL-backed core returns ACCEPTED only after
+            inbox evidence and its append-only domain event commit atomically. An exact
+            replay returns DUPLICATE; an unconfigured or unavailable store returns RETRY.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PushOperationsResponse"
+        default: { $ref: "#/components/responses/Problem" }
+security:
+  - OIDC: []
+components:
+  securitySchemes:
+    OIDC:
+      type: openIdConnect
+      openIdConnectUrl: https://identity.example/.well-known/openid-configuration
+      description: Production mode validates RS256 issuer, audience, tenant, role, outlet, and lifetime claims.
+    OutletDeviceCertificate:
+      type: mutualTLS
+      description: Enrolled outlet device certificate; revocation is checked in PostgreSQL on each sync request.
+    DemoTenant:
+      type: apiKey
+      in: header
+      name: X-FeastCloud-Tenant-ID
+      description: Phase 0 adapter only; production uses OIDC and device certificates.
+    DemoActor:
+      type: apiKey
+      in: header
+      name: X-FeastCloud-Actor-ID
+      description: Phase 0 adapter only; production derives the actor from authentication.
+  parameters:
+    ResourceID:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    TenantFilter:
+      name: tenantId
+      in: query
+      description: Optional assertion; when present it must match the authenticated tenant.
+      schema: { type: string, maxLength: 128 }
+    OutletFilter:
+      name: outletId
+      in: query
+      schema: { type: string, format: uuid }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 256 }
+    CorrelationID:
+      name: X-Correlation-ID
+      in: header
+      schema: { type: string, format: uuid }
+  requestBodies:
+    Mutation:
+      required: true
+      content:
+        application/json:
+          schema:
+              $ref: "#/components/schemas/MutationEnvelope"
+    OrderTransition:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/MutationEnvelope"
+              - type: object
+                properties:
+                  payload: { $ref: "#/components/schemas/OrderTransitionInput" }
+    TicketTransition:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/MutationEnvelope"
+              - type: object
+                properties:
+                  payload: { $ref: "#/components/schemas/TicketTransitionInput" }
+  responses:
+    Created:
+      description: Resource created. Replays preserve the business result and set Idempotency-Replayed.
+      headers:
+        Location:
+          schema: { type: string }
+        Idempotency-Replayed:
+          schema: { type: boolean }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ResponseEnvelope" }
+    Entity:
+      description: A tenant-scoped entity.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ResponseEnvelope" }
+    Collection:
+      description: A cursor-paginated tenant-scoped collection.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/CollectionEnvelope" }
+    Problem:
+      description: Stable machine-readable problem details.
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+  schemas:
+    Health:
+      type: object
+      required: [status, service, version]
+      properties:
+        status: { type: string }
+        service: { type: string }
+        version: { type: string }
+        time: { type: string, format: date-time }
+    MutationEnvelope:
+      $ref: "../../../packages/contracts/schemas/mutation-envelope.json"
+    ResponseEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data: {}
+        meta:
+          type: object
+          required: [requestId]
+          properties:
+            requestId: { type: string }
+            idempotencyReplay: { type: boolean }
+    CollectionEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { type: array, items: {} }
+        meta:
+          type: object
+          required: [requestId, page]
+          properties:
+            requestId: { type: string }
+            page:
+              type: object
+              required: [limit]
+              properties:
+                limit: { type: integer }
+                nextCursor: { type: string }
+    Problem:
+      type: object
+      required: [type, title, status, detail, code, messageKey, correlationId, retryable]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        code: { type: string }
+        messageKey: { type: string }
+        correlationId: { type: string }
+        retryable: { type: boolean }
+        violations:
+          type: array
+          items:
+            type: object
+            required: [field, code, messageKey]
+            properties:
+              field: { type: string }
+              code: { type: string }
+              messageKey: { type: string }
+    DailyDashboardEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/DailyDashboard" }
+    DailyDashboard:
+      type: object
+      additionalProperties: false
+      required: [outletId, businessDate, currency, timeZone, period, asOf, sales, paymentFlow, orders, tenderMix, fulfillmentMix, hourly, leakage, topItems, dataQuality, provenance, unavailableFields]
+      properties:
+        outletId: { type: string, format: uuid }
+        businessDate: { type: string, format: date }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+        timeZone: { type: string }
+        period:
+          type: object
+          additionalProperties: false
+          required: [startsAt, endsAt, boundaryKind]
+          properties:
+            startsAt: { type: string, format: date-time }
+            endsAt: { type: string, format: date-time }
+            boundaryKind: { type: string, const: outlet_local_calendar_day }
+        asOf: { type: string, format: date-time }
+        sales:
+          $ref: "#/components/schemas/DashboardSales"
+        paymentFlow:
+          $ref: "#/components/schemas/DashboardPaymentFlow"
+        orders:
+          $ref: "#/components/schemas/DashboardOrders"
+        tenderMix:
+          type: array
+          items: { $ref: "#/components/schemas/DashboardTenderMix" }
+        fulfillmentMix:
+          type: array
+          items: { $ref: "#/components/schemas/DashboardFulfillmentMix" }
+        hourly:
+          type: array
+          items: { $ref: "#/components/schemas/DashboardHourly" }
+        leakage:
+          $ref: "#/components/schemas/DashboardLeakage"
+        topItems:
+          type: array
+          maxItems: 10
+          items: { $ref: "#/components/schemas/DashboardTopItem" }
+        dataQuality:
+          $ref: "#/components/schemas/DashboardDataQuality"
+        provenance:
+          type: object
+          additionalProperties: false
+          required: [sales, orders, payments, promotions, topItems]
+          properties:
+            sales: { type: string }
+            orders: { type: string }
+            payments: { type: string }
+            promotions: { type: string }
+            topItems: { type: string }
+        unavailableFields:
+          type: array
+          items: { type: string }
+    DashboardSales:
+      type: object
+      additionalProperties: false
+      required: [receiptedOrderCount, subtotalMinor, discountMinor, taxMinor, serviceChargeMinor, totalMinor]
+      properties:
+        receiptedOrderCount: { type: integer, format: int64, minimum: 0 }
+        subtotalMinor: { type: integer, format: int64, minimum: 0 }
+        discountMinor: { type: integer, format: int64, minimum: 0 }
+        taxMinor: { type: integer, format: int64, minimum: 0 }
+        serviceChargeMinor: { type: integer, format: int64, minimum: 0 }
+        totalMinor: { type: integer, format: int64, minimum: 0 }
+    DashboardPaymentFlow:
+      type: object
+      additionalProperties: false
+      required: [capturedCount, capturedMinor, refundCount, refundMinor, netMinor]
+      properties:
+        capturedCount: { type: integer, format: int64, minimum: 0 }
+        capturedMinor: { type: integer, format: int64, minimum: 0 }
+        refundCount: { type: integer, format: int64, minimum: 0 }
+        refundMinor: { type: integer, format: int64, minimum: 0 }
+        netMinor: { type: integer, format: int64 }
+    DashboardOrders:
+      type: object
+      additionalProperties: false
+      required: [total, included, completed, cancelled, active, unpriced, subtotalMinor, discountMinor, taxMinor, serviceChargeMinor, orderValueMinor, averageOrderValueMinor]
+      properties:
+        total: { type: integer, format: int64, minimum: 0 }
+        included: { type: integer, format: int64, minimum: 0 }
+        completed: { type: integer, format: int64, minimum: 0 }
+        cancelled: { type: integer, format: int64, minimum: 0 }
+        active: { type: integer, format: int64, minimum: 0 }
+        unpriced: { type: integer, format: int64, minimum: 0 }
+        subtotalMinor: { type: integer, format: int64, minimum: 0 }
+        discountMinor: { type: integer, format: int64, minimum: 0 }
+        taxMinor: { type: integer, format: int64, minimum: 0 }
+        serviceChargeMinor: { type: integer, format: int64, minimum: 0 }
+        orderValueMinor: { type: integer, format: int64, minimum: 0 }
+        averageOrderValueMinor:
+          oneOf:
+            - { type: integer, format: int64, minimum: 0 }
+            - { type: "null" }
+    DashboardTenderMix:
+      type: object
+      additionalProperties: false
+      required: [tenderType, capturedCount, capturedMinor, refundCount, refundMinor, netMinor]
+      properties:
+        tenderType: { type: string, enum: [cash, upi, card_terminal, external] }
+        capturedCount: { type: integer, format: int64, minimum: 0 }
+        capturedMinor: { type: integer, format: int64, minimum: 0 }
+        refundCount: { type: integer, format: int64, minimum: 0 }
+        refundMinor: { type: integer, format: int64, minimum: 0 }
+        netMinor: { type: integer, format: int64 }
+    DashboardFulfillmentMix:
+      type: object
+      additionalProperties: false
+      required: [orderType, orderCount, orderValueMinor]
+      properties:
+        orderType: { type: string, enum: [dineIn, takeaway, delivery, roomService] }
+        orderCount: { type: integer, format: int64, minimum: 0 }
+        orderValueMinor: { type: integer, format: int64, minimum: 0 }
+    DashboardHourly:
+      type: object
+      additionalProperties: false
+      required: [localHour, startsAt, orderCount, orderValueMinor]
+      properties:
+        localHour: { type: integer, minimum: 0, maximum: 23 }
+        startsAt: { type: string, format: date-time }
+        orderCount: { type: integer, format: int64, minimum: 0 }
+        orderValueMinor: { type: integer, format: int64, minimum: 0 }
+    DashboardLeakage:
+      type: object
+      additionalProperties: false
+      required: [cancelledOrderCount, cancelledOrderValueMinor, refundCount, refundMinor, promotionRedemptionCount, promotionDiscountMinor]
+      properties:
+        cancelledOrderCount: { type: integer, format: int64, minimum: 0 }
+        cancelledOrderValueMinor: { type: integer, format: int64, minimum: 0 }
+        refundCount: { type: integer, format: int64, minimum: 0 }
+        refundMinor: { type: integer, format: int64, minimum: 0 }
+        promotionRedemptionCount: { type: integer, format: int64, minimum: 0 }
+        promotionDiscountMinor: { type: integer, format: int64, minimum: 0 }
+    DashboardTopItem:
+      type: object
+      additionalProperties: false
+      required: [name, quantity, lineValueMinor]
+      properties:
+        menuItemId: { type: string, format: uuid }
+        name: { type: string }
+        quantity: { type: integer, format: int64, minimum: 1 }
+        lineValueMinor: { type: integer, format: int64, minimum: 0 }
+    DashboardDataQuality:
+      type: object
+      additionalProperties: false
+      required: [futureDatedOrderCount, orderCurrencyMismatchCount, receiptCurrencyMismatchCount, tenderCurrencyMismatchCount, orderLineCurrencyMismatchCount, unlinkedMenuItemLineCount]
+      properties:
+        futureDatedOrderCount: { type: integer, format: int64, minimum: 0 }
+        orderCurrencyMismatchCount: { type: integer, format: int64, minimum: 0 }
+        receiptCurrencyMismatchCount: { type: integer, format: int64, minimum: 0 }
+        tenderCurrencyMismatchCount: { type: integer, format: int64, minimum: 0 }
+        orderLineCurrencyMismatchCount: { type: integer, format: int64, minimum: 0 }
+        unlinkedMenuItemLineCount: { type: integer, format: int64, minimum: 0 }
+    Money:
+      type: object
+      additionalProperties: false
+      required: [minorUnits, currency]
+      properties:
+        minorUnits: { type: integer, format: int64, minimum: 0 }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+    OrderTransitionInput:
+      type: object
+      additionalProperties: false
+      required: [toStatus, expectedVersion]
+      properties:
+        toStatus: { type: string, enum: [accepted, preparing, ready, completed, cancelled] }
+        expectedVersion: { type: integer, format: int64, minimum: 1 }
+    TicketTransitionInput:
+      type: object
+      additionalProperties: false
+      required: [toStatus, expectedVersion]
+      properties:
+        toStatus: { type: string, enum: [fired, preparing, ready, completed, cancelled] }
+        expectedVersion: { type: integer, format: int64, minimum: 1 }
+    OrganizationInput:
+      type: object
+      additionalProperties: false
+      required: [id, name, defaultLocale, defaultCurrency]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 160 }
+        legalName: { type: string, maxLength: 240 }
+        defaultLocale: { type: string, minLength: 1, maxLength: 35 }
+        defaultCurrency: { type: string, pattern: "^[A-Z]{3}$" }
+        active: { type: boolean, default: true }
+    OutletInput:
+      type: object
+      additionalProperties: false
+      required: [id, organizationId, name, code, timeZone, currency]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        name: { type: string }
+        code: { type: string }
+        timeZone: { type: string }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+        active: { type: boolean, default: true }
+    BrandInput:
+      type: object
+      additionalProperties: false
+      required: [id, organizationId, name, code]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        name: { type: string }
+        code: { type: string }
+        active: { type: boolean, default: true }
+    BrandOutletAssignmentInput:
+      type: object
+      additionalProperties: false
+      required: [brandId, outletId, active, expectedVersion]
+      properties:
+        brandId: { type: string, format: uuid }
+        outletId: { type: string, format: uuid }
+        active: { type: boolean }
+        expectedVersion:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Use 0 only to create the assignment. Use the last returned version to pause or resume it.
+    BrandOutletAssignment:
+      type: object
+      additionalProperties: false
+      required: [tenantId, brandId, outletId, active, version, createdAt, updatedAt]
+      properties:
+        tenantId: { type: string, format: uuid }
+        brandId: { type: string, format: uuid }
+        outletId: { type: string, format: uuid }
+        active: { type: boolean }
+        version: { type: integer, format: int64, minimum: 1 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    TenantProvisionInput:
+      type: object
+      additionalProperties: false
+      required: [organizationName, ownerName, ownerEmail, defaultLocale, defaultCurrency, outletName, outletCode, timeZone, brandName, brandCode, template]
+      properties:
+        organizationName: { type: string, minLength: 1, maxLength: 160 }
+        legalName: { type: string, maxLength: 240 }
+        ownerName: { type: string, minLength: 1, maxLength: 160 }
+        ownerEmail: { type: string, format: email, maxLength: 254 }
+        defaultLocale: { type: string, maxLength: 35 }
+        defaultCurrency: { type: string, pattern: "^[A-Z]{3}$" }
+        outletName: { type: string, minLength: 1, maxLength: 160 }
+        outletCode: { type: string, minLength: 1, maxLength: 64 }
+        timeZone: { type: string }
+        brandName: { type: string, minLength: 1, maxLength: 160 }
+        brandCode: { type: string, minLength: 1, maxLength: 64 }
+        template: { type: string, enum: [restaurant, cloud, central] }
+    StationInput:
+      type: object
+      additionalProperties: false
+      required: [id, outletId, name, code, type]
+      properties:
+        id: { type: string, format: uuid }
+        outletId: { type: string, format: uuid }
+        name: { type: string }
+        code: { type: string }
+        type: { type: string, enum: [preparation, cooking, beverage, assembly, expo, packing] }
+        active: { type: boolean, default: true }
+    OrderInput:
+      type: object
+      additionalProperties: false
+      required: [id, outletId, type, lines, subtotal, discountTotal, taxTotal, serviceCharge, total, placedAt]
+      properties:
+        id: { type: string, format: uuid }
+        outletId: { type: string, format: uuid }
+        brandId: { type: string, format: uuid }
+        externalRef: { type: string }
+        type: { type: string, enum: [dineIn, takeaway, delivery, roomService] }
+        status: { type: string, enum: [received, accepted, preparing, ready, completed, cancelled] }
+        lines:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, name, quantity, unitPrice, lineTotal]
+            properties:
+              id: { type: string, format: uuid }
+              menuItemId: { type: string, format: uuid }
+              name: { type: string }
+              quantity: { type: integer, minimum: 1 }
+              unitPrice: { $ref: "#/components/schemas/Money" }
+              lineTotal: { $ref: "#/components/schemas/Money" }
+              preparationNote: { type: string }
+        subtotal: { $ref: "#/components/schemas/Money" }
+        discountTotal: { $ref: "#/components/schemas/Money" }
+        taxTotal: { $ref: "#/components/schemas/Money" }
+        serviceCharge: { $ref: "#/components/schemas/Money" }
+        total: { $ref: "#/components/schemas/Money" }
+        placedAt: { type: string, format: date-time }
+    KitchenTicketInput:
+      type: object
+      additionalProperties: false
+      required: [id, outletId, orderId, stationId, lineIds, priority]
+      properties:
+        id: { type: string, format: uuid }
+        outletId: { type: string, format: uuid }
+        orderId: { type: string, format: uuid }
+        stationId: { type: string, format: uuid }
+        lineIds: { type: array, minItems: 1, items: { type: string, format: uuid } }
+        status: { type: string, enum: [queued, fired, preparing, ready, completed, cancelled] }
+        priority: { type: integer, minimum: 0, maximum: 100 }
+        targetAt: { type: string, format: date-time }
+    PushOperationsRequest:
+      type: object
+      additionalProperties: false
+      required: [batchId, edgeId, outletId, operations]
+      properties:
+        batchId: { type: string, minLength: 1, maxLength: 128 }
+        edgeId: { type: string, minLength: 1, maxLength: 128 }
+        outletId: { type: string, minLength: 1, maxLength: 128 }
+        operations:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            type: object
+            additionalProperties: false
+            required: [operationId, aggregateType, aggregateId, aggregateVersion, commandType, mutation]
+            properties:
+              operationId: { type: string, format: uuid }
+              aggregateType: { type: string }
+              aggregateId: { type: string, format: uuid }
+              aggregateVersion: { type: integer, format: int64, minimum: 0 }
+              commandType: { type: string }
+              mutation: { $ref: "#/components/schemas/MutationEnvelope" }
+              recordedAt: { type: string, format: date-time }
+    PushOperationsResponse:
+      type: object
+      required: [batchId, results]
+      properties:
+        batchId: { type: string }
+        results:
+          type: array
+          items:
+            type: object
+            required: [operationId, status]
+            properties:
+              operationId: { type: string, format: uuid }
+              status:
+                type: string
+                enum: [ACCEPTED, DUPLICATE, REJECTED, CONFLICT, RETRY]
+                description: ACCEPTED and DUPLICATE are emitted only after durable cloud commit.
+              problemCode:
+                type: string
+                description: Stable rejection, conflict, or retry reason.
+              retryAfterSeconds: { type: integer, minimum: 1 }

@@ -1,0 +1,59 @@
+{
+  "name": "feastcloud",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open-source, offline-first Food and Kitchen Operating System",
+  "license": "AGPL-3.0-only",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @feastcloud/web",
+    "dev:connected": "VITE_EDGE_URL=http://localhost:8081 VITE_CORE_URL=http://localhost:8080 npm run dev --workspace @feastcloud/web",
+    "build": "npm run build --workspace @feastcloud/web",
+    "test": "npm run test --workspace @feastcloud/web",
+    "typecheck": "npm run typecheck --workspace @feastcloud/web",
+    "check": "npm run contracts:validate && npm run licenses:node && npm run typecheck && npm run test && npm run build",
+    "verify": "npm run check && npm run licenses:go && npm run go:test && npm run go:vet && npm run smoke:connected && npm run smoke:postgres",
+    "core:dev": "cd services/core && go run ./cmd/core",
+    "core:postgres": "FEASTCLOUD_DATABASE_URL=${FEASTCLOUD_DATABASE_URL:-postgres://feastcloud_runtime:feastcloud_dev_runtime@127.0.0.1:54329/feastcloud?sslmode=disable} npm run core:dev",
+    "core:test": "cd services/core && go test ./...",
+    "edge:dev": "sh scripts/run-edge-dev.sh",
+    "edge:test": "cd services/edge && go test ./...",
+    "smoke:connected": "node scripts/smoke-connected.mjs",
+    "smoke:postgres": "node scripts/smoke-postgres.mjs",
+    "db:install": "sh scripts/postgres-install-native.sh",
+    "db:up": "sh scripts/postgres-native.sh start",
+    "db:down": "sh scripts/postgres-native.sh stop",
+    "db:status": "sh scripts/postgres-native.sh status",
+    "db:logs": "sh scripts/postgres-native.sh logs",
+    "db:test": "sh scripts/postgres-native.sh test",
+    "db:docker:up": "docker compose -f compose.dev.yaml up -d --wait postgres",
+    "db:docker:down": "docker compose -f compose.dev.yaml down",
+    "go:test": "go test ./services/core/... ./services/edge/...",
+    "go:vet": "go vet ./services/core/... ./services/edge/...",
+    "contracts:validate": "node scripts/validate-contracts.mjs",
+    "licenses:check": "npm run licenses:node && npm run licenses:go",
+    "licenses:node": "node scripts/check-node-licenses.mjs",
+    "licenses:go": "node scripts/check-go-licenses.mjs",
+    "security:node": "npm audit --audit-level=moderate",
+    "security:core": "cd services/core && GOWORK=off go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...",
+    "security:edge": "cd services/edge && GOWORK=off go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...",
+    "security:go": "npm run security:core && npm run security:edge",
+    "security:check": "npm run security:node && npm run security:go",
+    "sbom:web": "mkdir -p dist/sbom && npm sbom --sbom-format cyclonedx > dist/sbom/web.cdx.json",
+    "sbom:core": "mkdir -p dist/sbom && cd services/core && GOWORK=off go run github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@v1.10.0 mod -json -licenses -output ../../dist/sbom/core.cdx.json",
+    "sbom:edge": "mkdir -p dist/sbom && cd services/edge && GOWORK=off go run github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@v1.10.0 mod -json -licenses -output ../../dist/sbom/edge.cdx.json",
+    "sbom": "npm run sbom:web && npm run sbom:core && npm run sbom:edge",
+    "release:check": "npm run verify && npm run security:check && npm run sbom"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "vite": "8.2.0"
+  }
+}

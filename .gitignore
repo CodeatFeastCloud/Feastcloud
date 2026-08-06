@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+.cache/
+
+# Build output
+dist/
+build/
+coverage/
+*.out
+*.tsbuildinfo
+
+# Runtime state
+.env
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+.feastcloud/
+
+# Tooling
+.DS_Store
+.idea/
+.vscode/
+*.log

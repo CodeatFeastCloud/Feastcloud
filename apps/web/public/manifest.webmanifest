@@ -1,0 +1,38 @@
+{
+  "name": "FeastCloud Kitchen OS",
+  "short_name": "FeastCloud",
+  "description": "Offline-first order entry and kitchen display system",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f8f9fa",
+  "theme_color": "#2c3e50",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["business", "food", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/feastcloud.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New order",
+      "short_name": "Order",
+      "url": "/?view=orders",
+      "icons": [{ "src": "/icons/feastcloud.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Kitchen display",
+      "short_name": "Kitchen",
+      "url": "/?view=kds",
+      "icons": [{ "src": "/icons/feastcloud.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

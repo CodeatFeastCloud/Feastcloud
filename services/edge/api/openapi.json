@@ -1,0 +1,357 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FeastCloud Outlet Edge API",
+    "version": "0.1.0",
+    "description": "Offline-local order, kitchen display, and synchronization API for an enrolled FeastCloud outlet edge.",
+    "license": {
+      "name": "AGPL-3.0-only",
+      "identifier": "AGPL-3.0-only"
+    }
+  },
+  "servers": [
+    { "url": "http://127.0.0.1:8081" }
+  ],
+  "security": [
+    { "EdgeBearer": [] }
+  ],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "edgeHealth",
+        "security": [],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Health" }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "edgeReadiness",
+        "security": [],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Health" },
+          "503": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1": {
+      "get": {
+        "operationId": "discoverEdgeV1",
+        "responses": {
+          "200": { "$ref": "#/components/responses/Entity" }
+        }
+      }
+    },
+    "/api/v1/pairing/codes": {
+      "post": {
+        "operationId": "createPairingCode",
+        "description": "Creates a single-use, short-lived browser pairing code. Manager or bootstrap authorization is required.",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PairingCodeRequest" } } } },
+        "responses": { "201": { "$ref": "#/components/responses/Entity" }, "default": { "$ref": "#/components/responses/Problem" } }
+      }
+    },
+    "/api/v1/pairing/sessions": {
+      "post": {
+        "operationId": "exchangePairingCode",
+        "security": [],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PairingSessionRequest" } } } },
+        "responses": { "201": { "$ref": "#/components/responses/Entity" }, "401": { "$ref": "#/components/responses/Problem" } }
+      }
+    },
+    "/api/v1/pairing/sessions/revoke": {
+      "post": {
+        "operationId": "revokeLocalSession",
+        "responses": { "204": { "description": "Session revoked." }, "401": { "$ref": "#/components/responses/Problem" } }
+      }
+    },
+    "/api/v1/orders": {
+      "get": {
+        "operationId": "listEdgeOrders",
+        "parameters": [
+          { "$ref": "#/components/parameters/OrderStatus" },
+          { "$ref": "#/components/parameters/Limit" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Collection" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      },
+      "post": {
+        "operationId": "createEdgeOrder",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": { "$ref": "#/components/requestBodies/Mutation" },
+        "responses": {
+          "201": { "$ref": "#/components/responses/Entity" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1/orders/{id}": {
+      "get": {
+        "operationId": "getEdgeOrder",
+        "parameters": [
+          { "$ref": "#/components/parameters/ResourceID" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Entity" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1/orders/{id}/transitions": {
+      "post": {
+        "operationId": "transitionEdgeOrder",
+        "parameters": [
+          { "$ref": "#/components/parameters/ResourceID" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": { "$ref": "#/components/requestBodies/Mutation" },
+        "responses": {
+          "200": { "$ref": "#/components/responses/Entity" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1/kitchen-tickets": {
+      "get": {
+        "operationId": "listEdgeKitchenTickets",
+        "parameters": [
+          { "$ref": "#/components/parameters/StationIDQuery" },
+          { "$ref": "#/components/parameters/TicketStatus" },
+          { "$ref": "#/components/parameters/Limit" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Collection" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1/kitchen-tickets/{id}": {
+      "get": {
+        "operationId": "getEdgeKitchenTicket",
+        "parameters": [
+          { "$ref": "#/components/parameters/ResourceID" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Entity" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1/kitchen-tickets/{id}/transitions": {
+      "post": {
+        "operationId": "transitionEdgeKitchenTicket",
+        "parameters": [
+          { "$ref": "#/components/parameters/ResourceID" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": { "$ref": "#/components/requestBodies/Mutation" },
+        "responses": {
+          "200": { "$ref": "#/components/responses/Entity" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1/stations/{stationId}/tickets": {
+      "get": {
+        "operationId": "listEdgeStationTickets",
+        "parameters": [
+          { "$ref": "#/components/parameters/StationIDPath" },
+          { "$ref": "#/components/parameters/TicketStatus" },
+          { "$ref": "#/components/parameters/Limit" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Collection" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1/sync/mutations": {
+      "post": {
+        "operationId": "ingestBrowserMutation",
+        "description": "Commits a PWA order-created, whole-order status, or station-ticket status event to the local projection and cloud outbox atomically.",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": { "$ref": "#/components/requestBodies/Mutation" },
+        "responses": {
+          "200": { "$ref": "#/components/responses/Entity" },
+          "201": { "$ref": "#/components/responses/Entity" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/v1/sync/status": {
+      "get": {
+        "operationId": "getEdgeSyncStatus",
+        "responses": {
+          "200": { "$ref": "#/components/responses/Entity" },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EdgeBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Short-lived paired browser session, or the edge bootstrap token for enrollment administration. Non-loopback deployments require TLS."
+      }
+    },
+    "parameters": {
+      "ResourceID": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" }
+      },
+      "StationIDPath": {
+        "name": "stationId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string", "minLength": 1, "maxLength": 128 }
+      },
+      "StationIDQuery": {
+        "name": "stationId",
+        "in": "query",
+        "schema": { "type": "string", "minLength": 1, "maxLength": 128 }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 500, "default": 100 }
+      },
+      "OrderStatus": {
+        "name": "status",
+        "in": "query",
+        "schema": { "$ref": "#/components/schemas/OrderStatus" }
+      },
+      "TicketStatus": {
+        "name": "status",
+        "in": "query",
+        "schema": { "$ref": "#/components/schemas/TicketStatus" }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "minLength": 8, "maxLength": 256 }
+      }
+    },
+    "requestBodies": {
+      "Mutation": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/MutationEnvelope" }
+          }
+        }
+      }
+    },
+    "responses": {
+      "Health": {
+        "description": "Health state.",
+        "content": {
+          "application/json": {
+            "schema": { "type": "object", "additionalProperties": true }
+          }
+        }
+      },
+      "Entity": {
+        "description": "Entity or command result envelope.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ResponseEnvelope" }
+          }
+        }
+      },
+      "Collection": {
+        "description": "Collection response envelope.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ResponseEnvelope" }
+          }
+        }
+      },
+      "Problem": {
+        "description": "Stable RFC 9457-style error response.",
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "PairingCodeRequest": {
+        "type": "object", "additionalProperties": false, "required": ["role"],
+        "properties": { "role": { "type": "string", "enum": ["manager", "cashier", "chef"] } }
+      },
+      "PairingSessionRequest": {
+        "type": "object", "additionalProperties": false, "required": ["code"],
+        "properties": { "code": { "type": "string", "pattern": "^[0-9]{8}$" } }
+      },
+      "MutationEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "tenantId", "outletId", "deviceId", "actorId", "occurredAt", "source", "schemaVersion", "idempotencyKey", "payload"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "tenantId": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "outletId": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "deviceId": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "actorId": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "occurredAt": { "type": "string", "format": "date-time" },
+          "source": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "sourceId": { "type": "string", "maxLength": 256 },
+          "schemaVersion": { "const": "1.0" },
+          "idempotencyKey": { "type": "string", "minLength": 8, "maxLength": 256 },
+          "causationId": { "type": "string", "format": "uuid" },
+          "correlationId": { "type": "string", "format": "uuid" },
+          "payload": { "type": "object" }
+        }
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": ["received", "accepted", "preparing", "ready", "completed", "cancelled"]
+      },
+      "TicketStatus": {
+        "type": "string",
+        "enum": ["queued", "fired", "preparing", "ready", "completed", "cancelled"]
+      },
+      "ResponseEnvelope": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {},
+          "meta": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "required": ["type", "title", "status", "code", "messageKey", "correlationId", "retryable", "detail"],
+        "properties": {
+          "type": { "type": "string", "format": "uri" },
+          "title": { "type": "string" },
+          "status": { "type": "integer", "minimum": 400, "maximum": 599 },
+          "code": { "type": "string" },
+          "messageKey": { "type": "string" },
+          "correlationId": { "type": "string" },
+          "retryable": { "type": "boolean" },
+          "detail": { "type": "string" },
+          "fieldViolations": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

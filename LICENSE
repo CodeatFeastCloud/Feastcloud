@@ -1,0 +1,18 @@
+FeastCloud applications and services are licensed under the GNU Affero
+General Public License, version 3 only (AGPL-3.0-only).
+
+Copyright (C) 2026 FeastCloud contributors
+
+You may redistribute and/or modify this software under the terms of the GNU
+Affero General Public License as published by the Free Software Foundation,
+version 3. This program is distributed WITHOUT ANY WARRANTY; without even the
+implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+The complete authoritative license text is included at:
+LICENSES/AGPL-3.0-only.txt
+
+SPDX-License-Identifier: AGPL-3.0-only
+
+Public interoperability contracts in packages/contracts are separately
+licensed under Apache-2.0; see packages/contracts/LICENSE and
+LICENSES/Apache-2.0.txt.

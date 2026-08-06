@@ -1,0 +1,1 @@
+BEGIN;DROP TABLE IF EXISTS tender_settlements,fiscal_receipts,tenders,cash_events,cash_shifts,dining_sessions,dining_tables,menu_availability_events,menu_item_availability;COMMIT;

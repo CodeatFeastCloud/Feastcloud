@@ -1,0 +1,19 @@
+{
+  "countryCode": "IN",
+  "name": "India foundation pack",
+  "version": "0.1.0",
+  "currencies": ["INR"],
+  "roundingMode": "half-up",
+  "taxRegimes": [
+    { "id": "gst", "name": "Goods and Services Tax" }
+  ],
+  "fiscalProfiles": [
+    {
+      "id": "gst-standard",
+      "documentTypes": ["receipt", "tax-invoice", "credit-note"],
+      "numberingAuthority": "legal-entity"
+    }
+  ],
+  "privacyPolicyReference": "https://docs.feastcloud.org/country-packs/in/privacy"
+}
+

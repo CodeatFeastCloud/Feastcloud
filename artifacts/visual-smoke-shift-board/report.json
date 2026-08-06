@@ -1,0 +1,81 @@
+{
+  "generatedAt": "2026-08-05T09:05:44.949Z",
+  "targetUrl": "http://127.0.0.1:5173/?view=overview",
+  "browser": "Google Chrome",
+  "passed": false,
+  "errorCount": 2,
+  "scenarios": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke-shift-board/desktop.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 1100
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "expectedSelector": ".shift-board",
+        "targetPresent": true,
+        "forbiddenText": "",
+        "forbiddenTextPresent": false,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": [
+        {
+          "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/dashboard/daily?outletId=33333333-3333-4333-8333-333333333333&date=2026-08-05"
+        }
+      ]
+    },
+    {
+      "name": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2,
+        "mobile": true
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke-shift-board/mobile.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 392,
+        "height": 1407
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "expectedSelector": ".shift-board",
+        "targetPresent": true,
+        "forbiddenText": "",
+        "forbiddenTextPresent": false,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": [
+        {
+          "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+          "source": "network",
+          "url": "http://localhost:8080/api/v1/dashboard/daily?outletId=33333333-3333-4333-8333-333333333333&date=2026-08-05"
+        }
+      ]
+    }
+  ]
+}

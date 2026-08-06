@@ -1,0 +1,69 @@
+{
+  "generatedAt": "2026-08-03T18:01:01.600Z",
+  "targetUrl": "http://localhost:5173/?view=overview",
+  "browser": "Google Chrome",
+  "passed": true,
+  "errorCount": 0,
+  "scenarios": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke-simple-dashboard-final-connected/desktop.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 1100
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "expectedSelector": ".executive-dashboard",
+        "targetPresent": true,
+        "forbiddenText": "Good service starts with a clear view.",
+        "forbiddenTextPresent": false,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": []
+    },
+    {
+      "name": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2,
+        "mobile": true
+      },
+      "screenshot": "/Users/mishs5/Library/CloudStorage/OneDrive-PegasystemsInc/Documents/FeastCloudKOS/artifacts/visual-smoke-simple-dashboard-final-connected/mobile.png",
+      "contentSize": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 1821
+      },
+      "hydration": {
+        "readyState": "complete",
+        "loadingElementPresent": false,
+        "restoringTextPresent": false,
+        "expectedSelector": ".executive-dashboard",
+        "targetPresent": true,
+        "forbiddenText": "Good service starts with a clear view.",
+        "forbiddenTextPresent": false,
+        "title": "FeastCloud · Kitchen OS"
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "runtimeExceptions": [],
+      "logErrors": []
+    }
+  ]
+}

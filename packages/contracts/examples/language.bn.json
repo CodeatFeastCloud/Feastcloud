@@ -1,0 +1,22 @@
+{
+  "locale": "bn-IN",
+  "name": "বাংলা",
+  "direction": "ltr",
+  "version": "0.1.0",
+  "fallbackLocale": "en-IN",
+  "certification": {
+    "ui": "draft",
+    "operations": "draft",
+    "speechInput": "draft",
+    "speechOutput": "unsupported"
+  },
+  "messages": {
+    "app.name": "FeastCloud",
+    "nav.orders": "অর্ডার",
+    "nav.kitchen": "রান্নাঘর",
+    "ticket.accept": "গ্রহণ করুন",
+    "ticket.start": "শুরু করুন",
+    "ticket.ready": "প্রস্তুত"
+  }
+}
+
