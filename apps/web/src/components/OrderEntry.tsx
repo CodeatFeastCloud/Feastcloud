@@ -449,14 +449,15 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
     setConnectors(realConnectors(installed));
     setIncomingError('');
   };
-  const simulateMappedSwiggyOrder = async () => {
+  const simulateMappedAggregatorOrder = async (providerName: 'Swiggy' | 'Zomato') => {
     if (!connectorApi || !tenantId || !outletId || simulatorBusy) return;
-    const connector = connectors.find((candidate) => candidate.provider.toLocaleLowerCase().includes('swiggy'));
+    const providerKey = providerName.toLocaleLowerCase();
+    const connector = connectors.find((candidate) => candidate.provider.toLocaleLowerCase().includes(providerKey));
     // Older connector drafts did not persist `active`; treat those mappings as
     // enabled so the local test flow keeps working after a configuration reload.
     const mappings = connector?.configuration?.externalOutlets?.filter((mapping) => mapping.active !== false) ?? [];
     if (!connector || mappings.length === 0) {
-      setIncomingError('Add the Swiggy restaurant mappings before running the simulator.');
+      setIncomingError(`Add the ${providerName} restaurant mappings before running the simulator.`);
       return;
     }
     setSimulatorBusy(true);
@@ -465,7 +466,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
       const now = Date.now();
       const index = Math.floor(Math.random() * mappings.length);
       const mapping = mappings[index];
-      if (!mapping) throw new Error('No active Swiggy restaurant mapping is available.');
+      if (!mapping) throw new Error(`No active ${providerName} restaurant mapping is available.`);
       const first = sourceMenu[(index * 2) % sourceMenu.length];
       const second = sourceMenu[(index * 2 + 1) % sourceMenu.length];
       const items = [first, second].filter((item): item is OrderCatalogItem => Boolean(item)).map((item, itemIndex) => ({
@@ -479,7 +480,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
       const totalMinor = items.reduce((total, item) => total + item.unitPriceMinor * item.quantity, 0);
       await ingestConnectorOrder(connectorApi, tenantId, outletId, connector.id, `SIM-${mapping.externalOutletId}-${createUuidV7()}`, {
           simulation: true,
-          provider: 'Swiggy',
+          provider: providerName,
           externalOutletId: mapping.externalOutletId,
           restaurant: { id: mapping.externalOutletId, name: mapping.brandName },
           customer: { name: 'Test guest', phone: '9000000000' },
@@ -493,7 +494,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
       await refreshIncoming();
       setIncomingFilter('awaiting');
     } catch (error) {
-      setIncomingError(error instanceof Error && error.message ? `The simulated Swiggy order could not be created: ${error.message}` : 'The simulated Swiggy order could not be created.');
+      setIncomingError(error instanceof Error && error.message ? `The simulated ${providerName} order could not be created: ${error.message}` : `The simulated ${providerName} order could not be created.`);
     } finally {
       setSimulatorBusy(false);
     }
@@ -778,7 +779,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
           })}</div>
         </div>
 
-        {import.meta.env.DEV && <aside className="incoming-simulator" aria-label="Local order simulator"><span><b>Local test simulator</b><small>Creates one test order for a randomly selected mapped Swiggy virtual brand.</small></span><button type="button" disabled={simulatorBusy} onClick={() => void simulateMappedSwiggyOrder()}>{simulatorBusy ? 'Creating test order…' : 'Simulate one random Swiggy order'}</button></aside>}
+        {import.meta.env.DEV && <aside className="incoming-simulator" aria-label="Local order simulator"><span><b>Local test simulator</b><small>Creates one test order for a randomly selected mapped virtual brand.</small></span><div className="incoming-simulator-actions"><button type="button" disabled={simulatorBusy} onClick={() => void simulateMappedAggregatorOrder('Swiggy')}>{simulatorBusy ? 'Creating test order…' : 'Simulate random Swiggy order'}</button><button type="button" disabled={simulatorBusy} onClick={() => void simulateMappedAggregatorOrder('Zomato')}>{simulatorBusy ? 'Creating test order…' : 'Simulate random Zomato order'}</button></div></aside>}
 
         <div className="incoming-commandbar">
           <div className="incoming-command-summary"><strong>{incomingOrders.length} total orders</strong><span>{openIncoming.length} awaiting action · {incomingOrders.filter((order) => order.status === 'accepted').length} accepted</span></div>

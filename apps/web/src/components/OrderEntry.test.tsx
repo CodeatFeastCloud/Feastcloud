@@ -185,8 +185,8 @@ describe('order entry', () => {
 
     vi.spyOn(Math, 'random').mockReturnValue(0.5);
     await act(async () => view.getByRole('button', { name: /online orders/i }).click());
-    await waitFor(() => expect(view.getByRole('button', { name: /simulate one random swiggy order/i })).toBeEnabled());
-    await act(async () => view.getByRole('button', { name: /simulate one random swiggy order/i }).click());
+    await waitFor(() => expect(view.getByRole('button', { name: /simulate random swiggy order/i })).toBeEnabled());
+    await act(async () => view.getByRole('button', { name: /simulate random swiggy order/i }).click());
 
     await waitFor(() => expect(view.getAllByText('Test')).toHaveLength(1));
     expect(view.getByText(mappings[2]!.brandName)).toBeVisible();
