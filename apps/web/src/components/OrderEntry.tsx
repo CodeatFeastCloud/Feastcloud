@@ -485,7 +485,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
       }
     }
     if (!connector || mappings.length === 0) {
-      setIncomingError(`Add the ${providerName} restaurant mappings before running the simulator.`);
+      setIncomingError(`Set up at least one ${providerName} restaurant before running the test.`);
       return;
     }
       const now = Date.now();
@@ -590,7 +590,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
       await decideConnectorInbox(connectorApi, tenantId, outletId, order.id, 'accepted', '', canonicalId);
       await refreshIncoming();
       setIncomingFilter('all');
-      setConfirmation(canonical ? `Order #${canonical.number} accepted and sent to the kitchen.` : 'Order acceptance synced with the partner inbox.');
+      setConfirmation(canonical ? `Order #${canonical.number} accepted and sent to the kitchen.` : 'Order accepted and sent to the kitchen.');
       if (confirmationTimer.current) window.clearTimeout(confirmationTimer.current);
       confirmationTimer.current = window.setTimeout(() => setConfirmation(''), 5000);
     } catch { setIncomingError(t('commerce.inbox.failed')); }
@@ -611,7 +611,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
         </nav>
         <div className="order-workspace-facts">
           <span><i className="is-live" />{importedMenu.length || sourceMenu.length} menu items</span>
-          <span><i />{connectors.filter((connector) => connector.status === 'healthy').length} integrations live</span>
+          <span><i />{connectors.filter((connector) => connector.status === 'healthy').length} delivery channels live</span>
         </div>
       </header>
 
@@ -797,20 +797,21 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
         </div>
       </> : <section className="incoming-workspace" aria-label="Incoming online orders">
         <div className="connector-strip">
-          <header><div><span>Integration points</span><strong>One acceptance queue</strong></div><small>Provider webhooks → FeastCloud normalizer → outlet acceptance → kitchen</small></header>
+          <header><div><span>Delivery channels</span><strong>All online orders in one place</strong></div><small>Orders from delivery apps come here for review before they reach the kitchen.</small></header>
           <div>{connectorCatalog.map((provider) => {
             const installed = connectors.find((connector) => connector.provider.toLocaleLowerCase().includes(provider.key));
             const hasTraffic = incomingOrders.some((order) => summarizeIncoming(order, connectorById.get(order.connectorId)).provider.toLocaleLowerCase().includes(provider.key));
             const state = installed?.status === 'healthy' ? 'Live' : installed?.status === 'degraded' ? 'Needs attention' : hasTraffic ? 'Receiving' : 'Ready to connect';
-            const mappedBrands = installed?.configuration?.externalOutlets?.filter((mapping) => mapping.active) ?? [];
-            return <article key={provider.key} style={{ '--connector-color': provider.color } as CSSProperties} className={installed?.status === 'healthy' || hasTraffic ? 'is-connected' : ''}><ProviderLogo provider={provider.name} /><span><b>{provider.name}</b><small>{mappedBrands.length ? `${mappedBrands.length} brands mapped · ${state}` : state}</small></span></article>;
+            const mappedBrands = installed?.configuration?.externalOutlets?.filter((mapping) => mapping.active !== false) ?? [];
+            const plainState = state === 'Ready to connect' ? 'Not connected' : state;
+            return <article key={provider.key} style={{ '--connector-color': provider.color } as CSSProperties} className={installed?.status === 'healthy' || hasTraffic ? 'is-connected' : ''}><ProviderLogo provider={provider.name} /><span><b>{provider.name}</b><small>{mappedBrands.length ? `${mappedBrands.length} brands set up · ${plainState}` : plainState}</small></span></article>;
           })}</div>
         </div>
 
-        {import.meta.env.DEV && <aside className="incoming-simulator" aria-label="Local order simulator"><span><b>Local test simulator</b><small>Creates one test order for a randomly selected mapped virtual brand.</small></span><div className="incoming-simulator-actions"><button type="button" disabled={simulatorBusy} onClick={() => void simulateMappedAggregatorOrder('Swiggy')}>{simulatorBusy ? 'Creating test order…' : 'Simulate random Swiggy order'}</button><button type="button" disabled={simulatorBusy} onClick={() => void simulateMappedAggregatorOrder('Zomato')}>{simulatorBusy ? 'Creating test order…' : 'Simulate random Zomato order'}</button></div></aside>}
+        {import.meta.env.DEV && <aside className="incoming-simulator" aria-label="Local order simulator"><span><b>Try a test order</b><small>Creates one sample order from a randomly selected restaurant brand.</small></span><div className="incoming-simulator-actions"><button type="button" disabled={simulatorBusy} onClick={() => void simulateMappedAggregatorOrder('Swiggy')}>{simulatorBusy ? 'Creating test order…' : 'Try a Swiggy order'}</button><button type="button" disabled={simulatorBusy} onClick={() => void simulateMappedAggregatorOrder('Zomato')}>{simulatorBusy ? 'Creating test order…' : 'Try a Zomato order'}</button></div></aside>}
 
         <div className="incoming-commandbar">
-          <div className="incoming-command-summary"><strong>{incomingOrders.length} total orders</strong><span>{openIncoming.length} awaiting action · {incomingOrders.filter((order) => order.status === 'accepted').length} accepted</span></div>
+          <div className="incoming-command-summary"><strong>{incomingOrders.length} online orders</strong><span>{openIncoming.length} waiting for your decision · {incomingOrders.filter((order) => order.status === 'accepted').length} sent to kitchen</span></div>
           <nav aria-label="Filter online orders">{(['all', 'awaiting', 'accepted', 'needs_review', 'rejected'] as const).map((filter) => {
             const count = filter === 'all' ? incomingOrders.length : filter === 'awaiting' ? incomingOrders.filter((order) => order.status === 'received').length : incomingOrders.filter((order) => order.status === filter).length;
             const label = filter === 'all' ? 'All orders' : filter === 'needs_review' ? 'Review' : filter[0].toUpperCase() + filter.slice(1);
@@ -819,7 +820,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
           <button type="button" onClick={() => void refreshIncoming()} disabled={!connectorApi || !!incomingBusy}>Refresh orders</button>
         </div>
         {incomingError && <p className="incoming-error" role="alert">{incomingError}</p>}
-        {!connectorApi ? <div className="incoming-empty"><Icon name="wifi" /><strong>Connect Core to receive partner orders</strong><p>The common connector inbox is ready for signed webhooks and provider normalizers.</p></div> : displayedIncoming.length === 0 ? <div className="incoming-empty"><Icon name="check" /><strong>No orders in this view</strong><p>Choose All orders to see the complete partner-order history.</p></div> : <div className="incoming-grid">{displayedIncoming.map((order) => {
+        {!connectorApi ? <div className="incoming-empty"><Icon name="wifi" /><strong>Online orders are not connected</strong><p>Connect the restaurant’s delivery channels to receive orders here.</p></div> : displayedIncoming.length === 0 ? <div className="incoming-empty"><Icon name="check" /><strong>No orders in this view</strong><p>Choose All orders to see previous orders.</p></div> : <div className="incoming-grid">{displayedIncoming.map((order) => {
           const summary = summarizeIncoming(order, connectorById.get(order.connectorId));
           const provider = connectorCatalog.find((value) => summary.provider.toLocaleLowerCase().includes(value.key));
           const ageMinutes = Math.max(0, Math.floor((Date.now() - Date.parse(order.receivedAt)) / 60_000));
@@ -833,9 +834,9 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
               {summary.deliveryPartner && <div><dt>Rider</dt><dd>{summary.deliveryPartner}</dd></div>}
               {summary.address && <div className="span-two"><dt>Deliver to</dt><dd>{summary.address}</dd></div>}
             </dl>}
-            <ul>{summary.lines.length > 0 ? summary.lines.map((line, index) => <li key={`${line.name}:${index}`}><b>{line.quantity}×</b><span>{line.name}{line.addons.length > 0 && <small>{line.addons.join(', ')}</small>}{line.note && <small>{line.note}</small>}</span>{line.unitPriceMinor !== undefined && <strong>{formatMoney(locale, line.unitPriceMinor * line.quantity)}</strong>}</li>) : <li className="unmapped"><span>Item mapping could not be read from this provider payload.</span></li>}</ul>
+            <ul>{summary.lines.length > 0 ? summary.lines.map((line, index) => <li key={`${line.name}:${index}`}><b>{line.quantity}×</b><span>{line.name}{line.addons.length > 0 && <small>{line.addons.join(', ')}</small>}{line.note && <small>{line.note}</small>}</span>{line.unitPriceMinor !== undefined && <strong>{formatMoney(locale, line.unitPriceMinor * line.quantity)}</strong>}</li>) : <li className="unmapped"><span>We could not match the items in this order to your menu.</span></li>}</ul>
             {summary.note && <p className="incoming-note">{summary.note}</p>}
-            <details className="incoming-provider-details"><summary>Provider details</summary><pre>{JSON.stringify(order.payload, null, 2)}</pre></details>
+            <details className="incoming-provider-details"><summary>Technical details</summary><pre>{JSON.stringify(order.payload, null, 2)}</pre></details>
             {(order.status === 'received' || order.status === 'needs_review') ? <footer><button type="button" className="incoming-reject" disabled={!!incomingBusy} onClick={() => void decideIncoming(order, 'rejected')}>{t('commerce.inbox.reject')}</button><button type="button" className="incoming-review" disabled={!!incomingBusy} onClick={() => void decideIncoming(order, 'needs_review')}>{t('commerce.inbox.review')}</button><button type="button" className="incoming-accept" disabled={!!incomingBusy || summary.lines.length === 0} onClick={() => void acceptIncoming(order)}>{incomingBusy === order.id ? 'Accepting…' : t('commerce.inbox.accept')}</button></footer> : <footer className="incoming-resolution"><span>{order.status === 'accepted' ? 'Sent to kitchen' : order.status === 'rejected' ? 'Rejected by outlet' : 'Marked duplicate'}</span>{order.normalizedOrderId && <code>{order.normalizedOrderId}</code>}</footer>}
           </article>;
         })}</div>}

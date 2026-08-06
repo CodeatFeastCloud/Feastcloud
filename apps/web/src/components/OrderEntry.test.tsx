@@ -185,14 +185,14 @@ describe('order entry', () => {
 
     vi.spyOn(Math, 'random').mockReturnValue(0.5);
     await act(async () => view.getByRole('button', { name: /online orders/i }).click());
-    await waitFor(() => expect(view.getByRole('button', { name: /simulate random swiggy order/i })).toBeEnabled());
-    await act(async () => view.getByRole('button', { name: /simulate random swiggy order/i }).click());
+    await waitFor(() => expect(view.getByRole('button', { name: /try a swiggy order/i })).toBeEnabled());
+    await act(async () => view.getByRole('button', { name: /try a swiggy order/i }).click());
 
     await waitFor(() => expect(view.getAllByText('Test')).toHaveLength(1));
     expect(view.getByText(mappings[2]!.brandName)).toBeVisible();
     expect(calls.filter((call) => call.method === 'POST' && call.url.endsWith('/connector-order-inbox'))).toHaveLength(1);
     expect(calls.some((call) => call.method === 'POST' && call.url.endsWith('/connector-order-inbox') && (call.payload?.payload as Record<string, unknown>)?.externalOutletId === mappings[2]!.externalOutletId)).toBe(true);
-    await act(async () => view.getAllByRole('button', { name: /accept to kitchen/i })[0].click());
+    await act(async () => view.getAllByRole('button', { name: /send to kitchen/i })[0].click());
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
