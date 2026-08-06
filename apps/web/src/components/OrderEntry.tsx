@@ -503,7 +503,7 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
           instructions: itemIndex === 0 ? 'Simulation: standard preparation' : '',
       }));
       const totalMinor = items.reduce((total, item) => total + item.unitPriceMinor * item.quantity, 0);
-      await ingestConnectorOrder(connectorApi, tenantId, outletId, connector.id, `SIM-${mapping.externalOutletId}-${createUuidV7()}`, {
+      const created = await ingestConnectorOrder(connectorApi, tenantId, outletId, connector.id, `SIM-${mapping.externalOutletId}-${createUuidV7()}`, {
           simulation: true,
           provider: providerName,
           externalOutletId: mapping.externalOutletId,
@@ -516,7 +516,10 @@ export function OrderEntry({ locale, tenantId, outletId, apiBase, t, onSubmit }:
           totalMinor,
           instructions: 'LOCAL TEST ORDER — do not prepare',
       });
-      await refreshIncoming();
+      // Put the accepted inbox response into this view immediately. The live
+      // stream will reconcile it with Core, but simulation should never make
+      // the operator navigate away or press Refresh to see the order.
+      setIncomingOrders((current) => [created, ...current.filter((order) => order.id !== created.id)]);
       setIncomingFilter('awaiting');
     } catch (error) {
       setIncomingError(error instanceof Error && error.message ? `The simulated ${providerName} order could not be created: ${error.message}` : `The simulated ${providerName} order could not be created.`);
