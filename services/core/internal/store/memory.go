@@ -20,6 +20,12 @@ type MemoryRepository struct {
 	brands          map[string]domain.Brand
 	brandOutlets    map[string]domain.BrandOutletAssignment
 	stations        map[string]domain.Station
+	units           map[string]domain.Unit
+	ingredients     map[string]domain.Ingredient
+	recipes         map[string]domain.Recipe
+	menuItems       map[string]domain.MenuItem
+	menuStudios     map[string]domain.MenuStudio
+	menuImports     map[string]domain.MenuImportDraft
 	orders          map[string]domain.Order
 	tickets         map[string]domain.KitchenTicket
 	audits          []domain.AuditEvent
@@ -35,6 +41,12 @@ func NewMemoryRepository() *MemoryRepository {
 		brands:          make(map[string]domain.Brand),
 		brandOutlets:    make(map[string]domain.BrandOutletAssignment),
 		stations:        make(map[string]domain.Station),
+		units:           make(map[string]domain.Unit),
+		ingredients:     make(map[string]domain.Ingredient),
+		recipes:         make(map[string]domain.Recipe),
+		menuItems:       make(map[string]domain.MenuItem),
+		menuStudios:     make(map[string]domain.MenuStudio),
+		menuImports:     make(map[string]domain.MenuImportDraft),
 		orders:          make(map[string]domain.Order),
 		tickets:         make(map[string]domain.KitchenTicket),
 		audits:          make([]domain.AuditEvent, 0),
@@ -66,27 +78,49 @@ func (m *MemoryRepository) CreateOrganization(ctx context.Context, value domain.
 // ProvisionTenant mirrors the durable provisioning transaction for local and
 // API tests. One audit event represents the single operator command.
 func (m *MemoryRepository) ProvisionTenant(ctx context.Context, organization domain.Organization, outlet domain.Outlet, brand domain.Brand, assignment domain.BrandOutletAssignment, stations []domain.Station, audit domain.AuditEvent) error {
-	if err := ctx.Err(); err != nil { return err }
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	if _, exists := m.organizations[organization.ID]; exists { return fmt.Errorf("%w: organization %q", ErrConflict, organization.ID) }
-	if _, exists := m.outlets[outlet.ID]; exists { return fmt.Errorf("%w: outlet %q", ErrConflict, outlet.ID) }
-	if _, exists := m.brands[brand.ID]; exists { return fmt.Errorf("%w: brand %q", ErrConflict, brand.ID) }
-	if organization.ID != organization.TenantID || outlet.TenantID != organization.TenantID || outlet.OrganizationID != organization.ID || brand.TenantID != organization.TenantID || brand.OrganizationID != organization.ID || assignment.TenantID != organization.TenantID || assignment.BrandID != brand.ID || assignment.OutletID != outlet.ID { return fmt.Errorf("%w: invalid tenant provisioning hierarchy", ErrInvalidReference) }
-	if err := validateAudit(audit, organization.TenantID, outlet.ID, "organization", organization.ID); err != nil { return err }
-	if err := m.ensureAuditOperationAvailableLocked(audit); err != nil { return err }
+	if _, exists := m.organizations[organization.ID]; exists {
+		return fmt.Errorf("%w: organization %q", ErrConflict, organization.ID)
+	}
+	if _, exists := m.outlets[outlet.ID]; exists {
+		return fmt.Errorf("%w: outlet %q", ErrConflict, outlet.ID)
+	}
+	if _, exists := m.brands[brand.ID]; exists {
+		return fmt.Errorf("%w: brand %q", ErrConflict, brand.ID)
+	}
+	if organization.ID != organization.TenantID || outlet.TenantID != organization.TenantID || outlet.OrganizationID != organization.ID || brand.TenantID != organization.TenantID || brand.OrganizationID != organization.ID || assignment.TenantID != organization.TenantID || assignment.BrandID != brand.ID || assignment.OutletID != outlet.ID {
+		return fmt.Errorf("%w: invalid tenant provisioning hierarchy", ErrInvalidReference)
+	}
+	if err := validateAudit(audit, organization.TenantID, outlet.ID, "organization", organization.ID); err != nil {
+		return err
+	}
+	if err := m.ensureAuditOperationAvailableLocked(audit); err != nil {
+		return err
+	}
 	seen := map[string]bool{}
 	for _, station := range stations {
-		if seen[station.ID] { return fmt.Errorf("%w: station %q", ErrConflict, station.ID) }
+		if seen[station.ID] {
+			return fmt.Errorf("%w: station %q", ErrConflict, station.ID)
+		}
 		seen[station.ID] = true
-		if _, exists := m.stations[station.ID]; exists { return fmt.Errorf("%w: station %q", ErrConflict, station.ID) }
-		if station.TenantID != organization.TenantID || station.OutletID != outlet.ID { return fmt.Errorf("%w: station hierarchy", ErrInvalidReference) }
+		if _, exists := m.stations[station.ID]; exists {
+			return fmt.Errorf("%w: station %q", ErrConflict, station.ID)
+		}
+		if station.TenantID != organization.TenantID || station.OutletID != outlet.ID {
+			return fmt.Errorf("%w: station hierarchy", ErrInvalidReference)
+		}
 	}
 	m.organizations[organization.ID] = organization
 	m.outlets[outlet.ID] = outlet
 	m.brands[brand.ID] = brand
 	m.brandOutlets[brandOutletKey(assignment.TenantID, assignment.BrandID, assignment.OutletID)] = assignment
-	for _, station := range stations { m.stations[station.ID] = station }
+	for _, station := range stations {
+		m.stations[station.ID] = station
+	}
 	m.appendAuditLocked(audit)
 	return nil
 }

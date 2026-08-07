@@ -99,10 +99,10 @@ func TestMenuImportValidationUsesDecodedPayload(t *testing.T) {
 	})
 
 	response := performMutation(server, "/api/v1/menu-imports", body, tenantOne, actorOne, metadata.IdempotencyKey)
-	// The memory repository correctly reports that durable imports need
-	// PostgreSQL. A 422 here would mean validation saw a pre-decode zero input.
-	if response.Code != http.StatusNotImplemented {
-		t.Fatalf("status = %d; want 501 after decoded validation; body=%s", response.Code, response.Body.String())
+	// The development repository accepts menu imports in memory. A 422 here
+	// would mean validation saw a pre-decode zero input.
+	if response.Code != http.StatusCreated {
+		t.Fatalf("status = %d; want 201 after decoded validation; body=%s", response.Code, response.Body.String())
 	}
 }
 
